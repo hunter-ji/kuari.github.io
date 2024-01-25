@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>独立开发 on 开发者小橙</title>
+        <link>https://blog.hunterji.com/tags/%E7%8B%AC%E7%AB%8B%E5%BC%80%E5%8F%91/</link>
+        <description>Recent content in 独立开发 on 开发者小橙</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Wed, 24 Jan 2024 23:53:17 +0000</lastBuildDate><atom:link href="https://blog.hunterji.com/tags/%E7%8B%AC%E7%AB%8B%E5%BC%80%E5%8F%91/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>裸辞后独立开发产品上线五天开始盈利，我是怎么做的？分享我的过程（上）</title>
+        <link>https://blog.hunterji.com/p/%E8%A3%B8%E8%BE%9E%E5%90%8E%E7%8B%AC%E7%AB%8B%E5%BC%80%E5%8F%91%E4%BA%A7%E5%93%81%E4%B8%8A%E7%BA%BF%E4%BA%94%E5%A4%A9%E5%BC%80%E5%A7%8B%E7%9B%88%E5%88%A9%E6%88%91%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E7%9A%84%E5%88%86%E4%BA%AB%E6%88%91%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%8A/</link>
+        <pubDate>Wed, 24 Jan 2024 23:53:17 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/p/%E8%A3%B8%E8%BE%9E%E5%90%8E%E7%8B%AC%E7%AB%8B%E5%BC%80%E5%8F%91%E4%BA%A7%E5%93%81%E4%B8%8A%E7%BA%BF%E4%BA%94%E5%A4%A9%E5%BC%80%E5%A7%8B%E7%9B%88%E5%88%A9%E6%88%91%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E7%9A%84%E5%88%86%E4%BA%AB%E6%88%91%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%8A/</guid>
+        <description>&lt;img src="https://blog.hunterji.com/p/%E8%A3%B8%E8%BE%9E%E5%90%8E%E7%8B%AC%E7%AB%8B%E5%BC%80%E5%8F%91%E4%BA%A7%E5%93%81%E4%B8%8A%E7%BA%BF%E4%BA%94%E5%A4%A9%E5%BC%80%E5%A7%8B%E7%9B%88%E5%88%A9%E6%88%91%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E7%9A%84%E5%88%86%E4%BA%AB%E6%88%91%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%8A/cover.png" alt="Featured image of post 裸辞后独立开发产品上线五天开始盈利，我是怎么做的？分享我的过程（上）" /&gt;&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;裸辞后，我花了一个多月开发我的第一个独立开发产品&lt;a class=&#34;link&#34; href=&#34;https://redismate.hunterji.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;RedisMate&lt;/a&gt;。其MVP版本上线五天，产品从没有排名，到冲到了国区mac app store开发工具类排名榜的前十，并持续有了几笔收入。&lt;/p&gt;
+&lt;p&gt;那么，我是怎么做的呢？&lt;/p&gt;
+&lt;p&gt;我是一个正在尝试独立开发的普通程序员，在此跟各位分享我的过程，不仅是我对自己的复盘，还希望能够给一些正在或准备尝试独立开发的兄弟一点参考。所有的过程都是按照我主观的想法去推进执行的，如果有更好的建议，欢迎交流！&lt;/p&gt;
+&lt;p&gt;本次分享分为上下两篇文章，分别为产品设计和产品推广两个主题。&lt;/p&gt;
+&lt;h2 id=&#34;起源&#34;&gt;起源&lt;/h2&gt;
+&lt;p&gt;首先，我并不是因为我有一个很棒的点子或产品，而选择去裸辞，去独立开发。&lt;/p&gt;
+&lt;p&gt;而是我因为别的原因选择了裸辞，然后开始把独立开发作为未来的一条路，并尝试去走。&lt;/p&gt;
+&lt;p&gt;所以，也可以说，一开始我是为了独立开发而去独立开发。&lt;/p&gt;
+&lt;h2 id=&#34;产品选择&#34;&gt;产品选择&lt;/h2&gt;
+&lt;p&gt;既然我没有一个很棒的点子去完成一个产品，那么我就开始去找。&lt;/p&gt;
+&lt;h3 id=&#34;自身条件&#34;&gt;自身条件&lt;/h3&gt;
+&lt;p&gt;首先，为了能够独立开发，我要审视自身，我会什么？&lt;/p&gt;
+&lt;p&gt;罗列下我的开发技能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;前端：Vue、TS、&amp;hellip;&lt;/li&gt;
+&lt;li&gt;后端：Go、Python、Rust&lt;/li&gt;
+&lt;li&gt;数据库：MySQL、Redis、PostgreSQL、ClickHouse、&amp;hellip;&lt;/li&gt;
+&lt;li&gt;运维：Docker、MQ、Nginx、&amp;hellip;&lt;/li&gt;
+&lt;li&gt;客户端/原生：Electron、Flutter、SwiftUI&lt;/li&gt;
+&lt;li&gt;硬件：esp32&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;检查下其它独立开发必需技能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;产品：自嗨水平&lt;/li&gt;
+&lt;li&gt;设计：自嗨水平&lt;/li&gt;
+&lt;li&gt;运营：几乎没有&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;罗列下我熟悉的可以寻找需求的领域：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;开发&lt;/li&gt;
+&lt;li&gt;玩游戏&lt;/li&gt;
+&lt;li&gt;Linux日常办公&lt;/li&gt;
+&lt;li&gt;Mac日常办公&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我能在独立开发过程中投入多少资源：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;时间：全职&lt;/li&gt;
+&lt;li&gt;资金：起初的时候几乎完全不想投入一块钱，但起码要支付苹果个人开发者年费+服务器年费+域名年费&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;产品形态&#34;&gt;产品形态&lt;/h3&gt;
+&lt;p&gt;那么，基于开发技能，得出我可以做的产品的形态：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;安卓app&lt;/li&gt;
+&lt;li&gt;ios app&lt;/li&gt;
+&lt;li&gt;Windows/Linux/macOS应用程序&lt;/li&gt;
+&lt;li&gt;SaaS&lt;/li&gt;
+&lt;li&gt;硬件&lt;/li&gt;
+&lt;li&gt;浏览器插件&lt;/li&gt;
+&lt;li&gt;编辑器插件&lt;/li&gt;
+&lt;li&gt;微信小程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;但是考虑到希望以较小的成本来尝试独立开发，和希望能够短期得到收入来验证产品，那么就剩下了&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;安卓app&lt;/li&gt;
+&lt;li&gt;ios app&lt;/li&gt;
+&lt;li&gt;Windows/Linux/macOS应用程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;并且还都是离线应用，不需要服务器的支撑，没有太多服务器的额外成本，服务器仅仅需要最小配置用来备案即可。&lt;/p&gt;
+&lt;p&gt;考虑到付费方式的成本、上架的成本，再排除掉安卓app、Windows/Linux应用程序。&lt;/p&gt;
+&lt;p&gt;那么就只剩下&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ios app&lt;/li&gt;
+&lt;li&gt;macOS应用程序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;产品需求&#34;&gt;产品需求&lt;/h3&gt;
+&lt;p&gt;确定了产品形态，我就要考虑，到底要做什么产品呢？产品需求是什么？&lt;/p&gt;
+&lt;p&gt;如果我从当下很火但我完全不熟悉的领域去找需求，那我肯定没法挖掘真正的需求。&lt;/p&gt;
+&lt;p&gt;如果我找一个熟悉某个领域的人咨询，他并没有挖掘需求的能力，无法识别出真正的需求，这一点在我多年的工作中已经见识过太多太多次了，最后完完全全就是一个定制化项目，在市场上根本没有竞争力。&lt;/p&gt;
+&lt;p&gt;这就要从上述罗列的，我熟悉的领域去找。&lt;/p&gt;
+&lt;p&gt;所以我把目标放在了“开发”上。“开发”是我最熟悉的领域，在其中这么多年了，需求来源于我自己，我就是用户，我就可以直接验证这个需求是不是伪需求，这个功能是不是好功能。&lt;/p&gt;
+&lt;p&gt;并且，鉴于我三年前开发过一款开源的Redis GUI Client——&lt;a class=&#34;link&#34; href=&#34;https://github.com/hunter-ji/RedisFish&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;RedisFish&lt;/a&gt;，积累了一些经验，并且后来因为工作搁置了，导致一直没有完成也心有遗憾。&lt;/p&gt;
+&lt;p&gt;所以最终决定开发一款Redis GUI for Mac。&lt;/p&gt;
+&lt;h2 id=&#34;市场调研&#34;&gt;市场调研&lt;/h2&gt;
+&lt;p&gt;在决定产品之后，我先去问了一圈我的朋友和前同事，他们正在用的Redis GUI是什么。&lt;/p&gt;
+&lt;p&gt;得到的回复是如下产品：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;RedisDesktopManager&lt;/li&gt;
+&lt;li&gt;AnotherRedisDesktopManager&lt;/li&gt;
+&lt;li&gt;Medis2&lt;/li&gt;
+&lt;li&gt;RedisFish（被我安利用我自己的开源产品，哈哈&amp;hellip;）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中RedisDesktopManager和AnotherRedisDesktopManager是最多的，毕竟是老牌的强劲产品！&lt;/p&gt;
+&lt;p&gt;然后，我又去翻了些论坛和帖子，发现有些人在发帖问mac上有哪些推荐的Redis GUI，但是哪怕是老外，也是如下选项居多：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;RedisDesktopManager&lt;/li&gt;
+&lt;li&gt;AnotherRedisDesktopManager&lt;/li&gt;
+&lt;li&gt;Medis2&lt;/li&gt;
+&lt;li&gt;RedisInsight&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;接着，我也去了解了下近期新出的，比如Tiny RDM，听劝作品，真的很棒的，哈哈。&lt;/p&gt;
+&lt;p&gt;然后还有几个出现在比如gitee等平台的。&lt;/p&gt;
+&lt;p&gt;所以目前mac原生的也只有Medis2。&lt;/p&gt;
+&lt;p&gt;最后，我就要说那个经典台词了：没有能够满足我需求的！（不是&amp;hellip;&lt;/p&gt;
+&lt;h2 id=&#34;重新构思mvp版本&#34;&gt;重新构思MVP版本&lt;/h2&gt;
+&lt;p&gt;到这个事件前，我已经开发完了既定的MVP版本，为v 1.1，此时的RedisMate是一个完成了基础Redis功能的App。&lt;/p&gt;
+&lt;p&gt;而我也已经怀着激动而又紧张的心情，在想如何推广MVP版本了。&lt;/p&gt;
+&lt;p&gt;但是，在我准备尝试推广的那个早上，在上厕所的时候，当时正在看《人性的弱点》。刚好看到书上讲了一个推销员的案例，推销员疯狂地讲述自己的产品怎么怎么好，让作者要赶紧买。&lt;/p&gt;
+&lt;p&gt;因此作者就在书上写道：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;人们其实什么东西都不需要。如果我们想买点什么，早就出门去买回来了。人们真正需要的，是解决问题的方式。人类永远都面临着种种问题，永远都需要这些问题的解决方案——如果销售人员能够证明其服务或产品可以帮助人们解决问题，不用推销，我们就会主动掏钱。对消费者而言，“主动买”比“被推销”的感觉好得多。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所以，我就在想，我现在做的这是什么啊？！我能给其他人解决什么问题呢？凭什么要选择我的，而不是别的成熟产品？&lt;/p&gt;
+&lt;p&gt;我就开始重新构思MVP版本，希望能够加上独特的、创新的功能，能够真实解决用户问题的功能。&lt;/p&gt;
+&lt;h2 id=&#34;创新&#34;&gt;创新&lt;/h2&gt;
+&lt;h3 id=&#34;寻找创新&#34;&gt;寻找创新&lt;/h3&gt;
+&lt;p&gt;如何发现问题并解决问题？可以从经济学的四种不同类型的效用来入手：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;场所效益：使得原本无法接触的事物变得可接触&lt;/li&gt;
+&lt;li&gt;形式效用：通过重新排列现有部件使某物更有价值&lt;/li&gt;
+&lt;li&gt;时间工具：让事情变快的工具&lt;/li&gt;
+&lt;li&gt;拥有权利：去除中间人&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;在此处，我的产品RedisMate上，最简单也是最快的的创新方式就是“让事情变得更快”。&lt;/p&gt;
+&lt;p&gt;我先明确Redis GUI使用频率最高的功能，然后从那个功能入手，让用户能够立竿见影感受到RedisMate的便捷。&lt;/p&gt;
+&lt;p&gt;那么，经过自己的总结，和跟朋友的沟通，我总结出，Redis GUI工具，使用频率从高到低的功能分别是：查（甚至是搜索）、删、改、增。&lt;/p&gt;
+&lt;p&gt;因此，我就从搜索功能入手。&lt;/p&gt;
+&lt;p&gt;我把RedisMate搜索功能的所有步骤罗列出来，然后思考，有哪些步骤可以减去？如何减少步骤？&lt;/p&gt;
+&lt;p&gt;最终就得到了现在“快速搜索”功能！&lt;/p&gt;
+&lt;p&gt;当Redis GUI窗口常驻时，一般最少需要约7步操作，那么在RedisMate上最少只要3步。&lt;/p&gt;
+&lt;p&gt;当Redis GUI仅打开没有连接任何服务器时，一般最少需要约9步操作，但是在RedisMate上最少只要3步。&lt;/p&gt;
+&lt;p&gt;当Redis GUI反复搜索固定key时，一般最少需要约4步，但是在RedisMate最少仅仅需要1步。&lt;/p&gt;
+&lt;p&gt;所以，我在RedisMate上针对搜索场景，进行了优化，并确实在推广时，得到了不少积极反馈。&lt;/p&gt;
+&lt;p&gt;并且，基于上述过程，优化了RedisMate的布局和一些细微的功能，让用户能够更直观更快去操作。&lt;/p&gt;
+&lt;h3 id=&#34;挖掘需求&#34;&gt;挖掘需求&lt;/h3&gt;
+&lt;p&gt;等我后面回过神的时候，才发现我一直有这个需求。&lt;/p&gt;
+&lt;p&gt;经常性，我要前后端一起开发，由于是微服务，多个节点并发开发和调试，每次都要开超多窗口。&lt;/p&gt;
+&lt;p&gt;我经常要切换窗口时，要愣一会儿思考一下，我要切什么窗口来着&amp;hellip;&lt;/p&gt;
+&lt;p&gt;所以我就一直在想，能不能省略掉这些窗口，窗口自己呼出然后切回去！&lt;/p&gt;
+&lt;p&gt;现在RedisMate就可以了，这就解决了我曾经的问题。&lt;/p&gt;
+&lt;p&gt;然后，我就又想到曾经的一个抱怨，有时候在调试时，代码有点问题，或者业务链路较长，需要联调时间有点长，或者MQ驱动的业务节点产生key有点慢等等，key在我查的时候没有出现。我就要反复调出Redis GUI然后点点点后搜索再点点点，发现不对！调一下代码，再来一遍！&lt;/p&gt;
+&lt;p&gt;我当时就在想，要是GUI能帮我盯着就好了。&lt;/p&gt;
+&lt;p&gt;所以，我设计了&amp;quot;Search Until Found&amp;quot;功能，在得到朋友的肯定后，将其加入到了MVP版本中 。&lt;/p&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结&lt;/h2&gt;
+&lt;p&gt;首先，我很庆幸自己这些年学习和玩了不少技术，让我能够在想去独立开发的时候，不仅能够独立完成开发，还能有多种产品形态可以选择。并且我也有意识地去读技术之外的书，让我在其它领域有那么点点基础，只可惜没有学得更多。&lt;/p&gt;
+&lt;p&gt;其次，我觉得对我而言，苹果生态开发是当前成本最小的方式。&lt;/p&gt;
+&lt;p&gt;然后，我从我熟悉的领域入手，寻找自己的痛点，验证自己的需求，得到解决方案后，向身边的目标用户寻求验证。&lt;/p&gt;
+&lt;p&gt;最后，花一个多月开发完MVP版本，推出来验证自己的产品。&lt;/p&gt;
+&lt;h2 id=&#34;最后&#34;&gt;最后&lt;/h2&gt;
+&lt;p&gt;感谢你看完这篇文章，希望我的经过能够给你一些参考，帮助到你。&lt;/p&gt;
+&lt;p&gt;本次分享的下一篇文章——产品推广方面，我正在努力写，敬请期待并关注我以获取更新。&lt;/p&gt;
+&lt;p&gt;如果你对我的产品RedisMate感兴趣，非常欢迎&lt;a class=&#34;link&#34; href=&#34;https://redismate.hunterji.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;点击此处&lt;/a&gt;了解和下载，或者在mac app store中搜索“RedisMate“。&lt;/p&gt;
+&lt;p&gt;最后，要感谢各位道上兄弟的关照，给了很多支持和反馈。&lt;/p&gt;
+&lt;p&gt;还要特别感谢那些购买高级版的兄弟，非常感谢你们的支持！&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
