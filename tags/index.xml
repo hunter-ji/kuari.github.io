@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Tags on 开发者小橙</title>
+        <link>https://blog.hunterji.com/tags/</link>
+        <description>Recent content in Tags on 开发者小橙</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Tue, 05 Dec 2023 15:56:29 +0000</lastBuildDate><atom:link href="https://blog.hunterji.com/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>日常分享</title>
+        <link>https://blog.hunterji.com/tags/%E6%97%A5%E5%B8%B8%E5%88%86%E4%BA%AB/</link>
+        <pubDate>Tue, 05 Dec 2023 15:56:29 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/%E6%97%A5%E5%B8%B8%E5%88%86%E4%BA%AB/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Rust</title>
+        <link>https://blog.hunterji.com/tags/rust/</link>
+        <pubDate>Thu, 26 Oct 2023 23:51:13 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/rust/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>WebAssembly</title>
+        <link>https://blog.hunterji.com/tags/webassembly/</link>
+        <pubDate>Thu, 26 Oct 2023 23:51:13 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/webassembly/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Javascript</title>
+        <link>https://blog.hunterji.com/tags/javascript/</link>
+        <pubDate>Tue, 27 Jun 2023 00:11:12 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/javascript/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>TypeScript</title>
+        <link>https://blog.hunterji.com/tags/typescript/</link>
+        <pubDate>Fri, 17 Feb 2023 13:31:56 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/typescript/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Golang</title>
+        <link>https://blog.hunterji.com/tags/golang/</link>
+        <pubDate>Thu, 09 Feb 2023 13:15:34 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/golang/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>CSS</title>
+        <link>https://blog.hunterji.com/tags/css/</link>
+        <pubDate>Sat, 28 Jan 2023 16:09:44 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/css/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Vue</title>
+        <link>https://blog.hunterji.com/tags/vue/</link>
+        <pubDate>Sat, 28 Jan 2023 16:09:44 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/vue/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Python</title>
+        <link>https://blog.hunterji.com/tags/python/</link>
+        <pubDate>Thu, 09 Jun 2022 22:57:54 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/python/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Electron</title>
+        <link>https://blog.hunterji.com/tags/electron/</link>
+        <pubDate>Mon, 29 Nov 2021 17:29:14 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/electron/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>uniapp</title>
+        <link>https://blog.hunterji.com/tags/uniapp/</link>
+        <pubDate>Thu, 25 Nov 2021 17:07:55 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/uniapp/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>前端</title>
+        <link>https://blog.hunterji.com/tags/%E5%89%8D%E7%AB%AF/</link>
+        <pubDate>Thu, 25 Nov 2021 17:07:55 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/%E5%89%8D%E7%AB%AF/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>ObjectStorage</title>
+        <link>https://blog.hunterji.com/tags/objectstorage/</link>
+        <pubDate>Wed, 29 Sep 2021 09:22:22 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/objectstorage/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Swift</title>
+        <link>https://blog.hunterji.com/tags/swift/</link>
+        <pubDate>Mon, 30 Aug 2021 14:29:02 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/swift/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Node</title>
+        <link>https://blog.hunterji.com/tags/node/</link>
+        <pubDate>Thu, 29 Jul 2021 13:49:13 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/node/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Docker</title>
+        <link>https://blog.hunterji.com/tags/docker/</link>
+        <pubDate>Wed, 14 Apr 2021 15:13:18 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/docker/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Nginx</title>
+        <link>https://blog.hunterji.com/tags/nginx/</link>
+        <pubDate>Sat, 15 Aug 2020 22:07:58 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/tags/nginx/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='最近很多小伙伴儿通过各种途径咨询我关于学习技术方面的问题，我都一一回复了。这里也专门出一个总结，关于我个人这些年入门新的编程语言和框架的经验和技巧...'>
+<title>如何快速入门新的编程语言和框架？</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='如何快速入门新的编程语言和框架？'>
+<meta property='og:description' content='最近很多小伙伴儿通过各种途径咨询我关于学习技术方面的问题，我都一一回复了。这里也专门出一个总结，关于我个人这些年入门新的编程语言和框架的经验和技巧...'>
+<meta property='og:url' content='https://blog.hunterji.com/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2023-11-29T21:10:40&#43;00:00'/><meta property='article:modified_time' content='2023-11-29T21:10:40&#43;00:00'/><meta property='og:image' content='https://blog.hunterji.com/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/cover.jpg' />
+<meta name="twitter:title" content="如何快速入门新的编程语言和框架？">
+<meta name="twitter:description" content="最近很多小伙伴儿通过各种途径咨询我关于学习技术方面的问题，我都一一回复了。这里也专门出一个总结，关于我个人这些年入门新的编程语言和框架的经验和技巧..."><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://blog.hunterji.com/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/cover.jpg' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一-前言">一. 前言</a></li>
+    <li><a href="#二-有编程经验时期">二. 有编程经验时期</a>
+      <ol>
+        <li><a href="#1-寻找共性">1. 寻找共性</a>
+          <ol>
+            <li><a href="#编程语言">编程语言</a></li>
+            <li><a href="#框架">框架</a></li>
+            <li><a href="#其它">其它</a></li>
+          </ol>
+        </li>
+        <li><a href="#2-看官方文档">2. 看官方文档</a></li>
+      </ol>
+    </li>
+    <li><a href="#二-新手时期">二. 新手时期</a>
+      <ol>
+        <li><a href="#1-仅学基础">1. 仅学基础</a></li>
+        <li><a href="#2-自己构思写一个项目">2. 自己构思写一个项目</a></li>
+        <li><a href="#3-不会就去学不懂就复制过来用">3. 不会就去学，不懂就复制过来用</a></li>
+        <li><a href="#4-多写代码迈过门槛">4. 多写代码，迈过门槛</a></li>
+      </ol>
+    </li>
+    <li><a href="#三-总结">三. 总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/">
+                <img src="/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/cover_hu289f93b8ec41ea81055c11038b70f240_213994_800x0_resize_q75_box.jpg"
+                        srcset="/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/cover_hu289f93b8ec41ea81055c11038b70f240_213994_800x0_resize_q75_box.jpg 800w, /p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/cover_hu289f93b8ec41ea81055c11038b70f240_213994_1600x0_resize_q75_box.jpg 1600w"
+                        width="800" 
+                        height="450" 
+                        loading="lazy"
+                        alt="Featured image of post 如何快速入门新的编程语言和框架？" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E6%96%B0%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E6%A1%86%E6%9E%B6/">如何快速入门新的编程语言和框架？</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            最近很多小伙伴儿通过各种途径咨询我关于学习技术方面的问题，我都一一回复了。这里也专门出一个总结，关于我个人这些年入门新的编程语言和框架的经验和技巧...
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Nov 29, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    1 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="一-前言">一. 前言</h2>
+<p>最近很多小伙伴儿咨询我关于学习技术方面的问题，我都一一回复了。这里也专门出一个总结，关于我个人这些年入门新的编程语言和框架的经验和技巧，来跟大家分享一下，希望能够所有帮助。</p>
+<p>本次分享分为两个时期：</p>
+<ul>
+<li>有编程经验时期</li>
+<li>新手时期</li>
+</ul>
+<h2 id="二-有编程经验时期">二. 有编程经验时期</h2>
+<p>当我有了一定开发经验后，去学习一个新的编程语言或者框架，我会注意如下两点：</p>
+<h3 id="1-寻找共性">1. 寻找共性</h3>
+<h4 id="编程语言">编程语言</h4>
+<p>所有的编程语言或者框架，都不是凭空产生的。当前比较流行的语言，大都是类C语言，比如我们常见的Java、Python、JavaScript、Golang等等。</p>
+<p>所以，我们学习的编程语言，除了特有的特性，大都是相似的，也就是它们的共性。我们只要理解和掌握这些类C语言的共性，就可以很快地掌握一门新的编程语言。</p>
+<p>那么，哪些是共性呢？比如说变量、常量、运算符、判断、循环、函数、面向对象等等。</p>
+<p>我们在学习一门新的编程语言的时候，是不是必然要学习如上这些共性的知识点？</p>
+<p>那么，当你已经有一个编程语言的基础后，当你在学习和写代码的时候，这些共性可以直接使用你已学会的编程语言的知识去代入。</p>
+<p>举个例子，比如我已经会Go了（不过，当你先学Go的话，可能不太知道面向对象是什么/狗头），要去学一下Python。</p>
+<p>我需要做的就是代入：</p>
+<ul>
+<li>
+<p>Go语言声明变量是<code>a := 1</code>，考虑到Python没有强类型，那么就直接<code>a = 1</code>就完事了。</p>
+</li>
+<li>
+<p>Go语言声明函数是<code>func aFunction(username String) {}</code>，那么Python不过是换了个关键词，去掉了强类型，变成<code>def aFunctino(username):</code>，当然Python如果要申明类型也是可以的，写成<code>def login(username: str):</code>。</p>
+</li>
+<li>
+<p>其中，比如运算符大都是一样的，判断也是类似。</p>
+</li>
+<li>
+<p>但是突然你发现，怎么Python的循环不一样，然后发现Python的循环好方便，但是其实原理还是和Go一样的。甚至，当你遇到不知道怎么处理的时候，直接来一波<code>for (i := 0; i &lt; count; i++)</code>。当然，Python没法这么写。</p>
+</li>
+</ul>
+<p>除了我举的这些例子，还有比如正则、数据类型、数据结构等等，都可以作为共性来代入。</p>
+<h4 id="框架">框架</h4>
+<p>其实，框架也是如此。此处以web框架为例，比如Python的Flask、Django、FastApi，Go的Gin，Node的express，Java的SpringBoot等，都是比较熟知的框架。</p>
+<p>这些Web框架，都是依托于网络的，大都是http(s)请求，甚至其他TCP请求。我们可以只在网络层面来看，它们共性就是request和response。所以在网络层面就可以理解为，后端web框架就是一个接收request和response的东西。</p>
+<p>那么，看具体框架的功能上，可以抽象出路由、中间件。</p>
+<p>所以，对于一个web框架，其共性为request、response、路由、中间件。</p>
+<p>因此，我们不管是使用Flask、Gin还是SpringBootd等，可以使用我们已有的框架知识去代入：</p>
+<ul>
+<li>如何接收request，比如获取request body、headers等</li>
+<li>如何使用中间件处理，比如使用中间件鉴权、传递上下文等</li>
+<li>如何配置路由，让接口对外暴露</li>
+<li>如何返回response，比如返回http status code、json等</li>
+</ul>
+<p>那么，就可以完成一个新的web框架的入门了。</p>
+<h4 id="其它">其它</h4>
+<p>除了编程语言和框架，其实还有很多别的都是拥有共性，可以快速入门的，比如Nginx和Apache，比如Linux发行版本，比如Kong和ApiSix，比如不同的数据库等等。甚至最近我发现，wasm并不是前端特有的，EBPF也在用wasm。</p>
+<h3 id="2-看官方文档">2. 看官方文档</h3>
+<p>编程语言的情况还比较少，更多是学习框架时，一定要看官方文档。</p>
+<p>网上虽然有很多教程，但是毕竟是二次加工的，可能存在信息遗漏、版本更新等等问题。</p>
+<p>官方文档可能比较生涩，但是它是最全最新的一手文档，会非常有助于少走弯路。</p>
+<p>再次强调，一定要看官方文档！</p>
+<h2 id="二-新手时期">二. 新手时期</h2>
+<p>当我还是新手的时候，我其实也常常苦恼于入门——教程看了好多遍，跟着教程敲了一遍又一遍，感觉还是只会基础，自己想写点什么却不会。</p>
+<p>后来，当我入门一段时间后，我返回去想一想，才想明白一些技巧。</p>
+<p>所以，以我的经历，总结如下步骤：</p>
+<h3 id="1-仅学基础">1. 仅学基础</h3>
+<p>一开始的时候，我也是不停地啃教程，不管是文档还是视频，但是发现我还是只会基础理论知识，那些高级特性案例都敲了，却并不明白什么意思。</p>
+<p>后来，我就发现，对于我而言，并不需要学太多，只要学会基础即可，甚至基础也不用太深入。</p>
+<h3 id="2-自己构思写一个项目">2. 自己构思写一个项目</h3>
+<p>跟着教程敲代码，效果甚微。</p>
+<p>要自己构思一个项目，比如写一个TODO，写一个命令行聊天工具，写一个博客等等简单的程序。最好是自己感兴趣的领域。</p>
+<p>但是，需要注意的是，一定要自己去构思如何写：</p>
+<ul>
+<li>你准备写一个什么程序？要达到什么效果？</li>
+<li>写这个程序有哪些功能？</li>
+<li>这些功能都应该怎么实现？</li>
+</ul>
+<p>然后，直接开始写代码！哪怕只是创建了几个文件。</p>
+<p>只有自己思考的，才能深刻理解和记忆。</p>
+<h3 id="3-不会就去学不懂就复制过来用">3. 不会就去学，不懂就复制过来用</h3>
+<p>当然，因为仅仅学了基础，你会发现很多功能并不会，甚至比如如何读取一个文件都不会。</p>
+<p>如果这时候，遇到不会的，就当场去学，哪怕是高级特性，学到把不会的这个点能做出来为止。</p>
+<p>如果一个功能不懂什么意思，搞不明白，那么直接复制过来，调试到能满足功能为止，然后将这段代码和这个场景记住。</p>
+<h3 id="4-多写代码迈过门槛">4. 多写代码，迈过门槛</h3>
+<p>我一直觉得写代码有一个门槛，在迈过门槛前，学习会非常困难，但是，一旦迈过这个门槛，你就会发现，学起来异常轻松，你所学的技术可以（相对）融会贯通。</p>
+<p>那么迈过这个门槛的方法就是：重复2和3两个步骤，多写代码，多思考。</p>
+<p>是的，不断重复，然后可能某一天，当你对你学的技术恍然大悟的时候，那么其实就是迈过了那个门槛。</p>
+<p>然后，之后便是更深入地学习了。</p>
+<h2 id="三-总结">三. 总结</h2>
+<p>一路走来，我觉得最重要的是“多写代码，多思考”。不少代码写到最后甚至都是肌肉记忆了，但是代码还是会变的，自己思考的方式和过程，自己沉淀的知识才是最宝贵的，足以支撑我能够不断学习新的技术，适应新的模式。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

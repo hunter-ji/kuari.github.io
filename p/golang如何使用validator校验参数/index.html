@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='简介 关于测试工程师，有一个笑话，是这样的：
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 一个测试工程师走进一家酒吧，要了一杯啤酒 一个测试工程师走进一家酒吧，要了一杯咖啡 一个测试工程师走进一家酒吧，要了0.7杯啤酒 一个测试工程师走进一家酒吧，要了-1杯啤酒 一个测试工程师走进一家酒吧，要了2^32杯啤酒 一个测试工程师走进一家酒吧，要了一杯洗脚水 一个测试工程师走进一家酒吧，要了一杯蜥蜴 一个测试工程师走进一家酒吧，要了一份asdfQwer@24dg!&amp;amp;*(@ 一个测试工程师走进一家酒吧，什么也没要 一个测试工程师走进家酒吧，又走出去又从窗户进来又从后门出去从下水道钻进来 一个测试工程师走进家酒吧，又走出去又进来又出去又进来又出去，最后在外面把老板打了一顿 一个测试工程师走进一 一个测试工程师走进一家酒吧，要了一杯烫烫烫的锟斤拷 一个测试工程师走进一家酒吧，要了NaN杯Null 1T测试工程师冲进一家酒吧，要了500T啤酒咖啡洗脚水野猫狼牙棒奶茶 1T测试工程师把酒吧拆了 一个测试工程师化装成老板走进一家酒吧，要了500杯啤酒，并且不付钱 一万个测试工程师在酒吧外呼啸而过 一个测试工程师走进一家酒吧，要了一杯啤酒‘;DROPTABLE酒吧 测试工程师们满意地离开了酒吧 这个笑话估计也只有开发才明白其中的笑点与心酸吧。
+对于一些刚入门的开发来说，这简直就是噩梦。当初刚入门的时候我的代码也是很多毛病，经不起这样的测试，后来渐渐地经验多了后，代码的健壮性逐渐提升，也明白其中比较重要的就是参数的校验。
+参数的使用有通过协议的接口调用（如http、rpc&amp;hellip;&amp;hellip;）、函数调用、库调用等等方式。
+其实对于http api的请求来说，现在很多web框架都已经自带了参数校验的功能，基本用起来都挺爽的，也无需多讲。
+而对于函数调用这样的常见方式，很多是要靠开发自己去校验参数的。如果仅仅是靠注释，在团队开发过程中，难免会有问题产生。起码我觉得，永远不要相信传过来的参数！
+OK，那么来讲讲这次的题目，就是Golang中的参数校验库——validator。
+用过Gin的小伙伴儿应该知道其binding参数验证器非常好用，其就是调用了validator。此处呢我们来介绍下validator的基础用法，和在一般场景下的应用案例。
+基础用法 介绍 validator包源码在github.com/go-playground/validator。其基于标记实现结构和单个字段的值验证，包含如下关键功能：
+使用验证标记或自定义验证程序进行跨字段和跨结构验证 Slice、Array和Map都可以允许验证多维字段的任何或者所有级别 能够深入查看映射键和值以进行验证 通过在验证之前确定类型接口的基础类型来处理类型接口 处理自定义字段类型 允许将多个验证映射到单个标记，以便在结构上更轻松地定义验证 提取自定义定义的字段名，例如，可以指定在验证时提取JSON名称，并使其在结果FieldError中可用 可定制的i18n错误消息 gin web框架的默认验证器 安装 1 go get github.com/go-playground/validator/v10 导入 1 import &amp;#34;github.'>
+<title>Golang如何使用validator校验参数</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/golang%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8validator%E6%A0%A1%E9%AA%8C%E5%8F%82%E6%95%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='Golang如何使用validator校验参数'>
+<meta property='og:description' content='简介 关于测试工程师，有一个笑话，是这样的：
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 一个测试工程师走进一家酒吧，要了一杯啤酒 一个测试工程师走进一家酒吧，要了一杯咖啡 一个测试工程师走进一家酒吧，要了0.7杯啤酒 一个测试工程师走进一家酒吧，要了-1杯啤酒 一个测试工程师走进一家酒吧，要了2^32杯啤酒 一个测试工程师走进一家酒吧，要了一杯洗脚水 一个测试工程师走进一家酒吧，要了一杯蜥蜴 一个测试工程师走进一家酒吧，要了一份asdfQwer@24dg!&amp;amp;*(@ 一个测试工程师走进一家酒吧，什么也没要 一个测试工程师走进家酒吧，又走出去又从窗户进来又从后门出去从下水道钻进来 一个测试工程师走进家酒吧，又走出去又进来又出去又进来又出去，最后在外面把老板打了一顿 一个测试工程师走进一 一个测试工程师走进一家酒吧，要了一杯烫烫烫的锟斤拷 一个测试工程师走进一家酒吧，要了NaN杯Null 1T测试工程师冲进一家酒吧，要了500T啤酒咖啡洗脚水野猫狼牙棒奶茶 1T测试工程师把酒吧拆了 一个测试工程师化装成老板走进一家酒吧，要了500杯啤酒，并且不付钱 一万个测试工程师在酒吧外呼啸而过 一个测试工程师走进一家酒吧，要了一杯啤酒‘;DROPTABLE酒吧 测试工程师们满意地离开了酒吧 这个笑话估计也只有开发才明白其中的笑点与心酸吧。
+对于一些刚入门的开发来说，这简直就是噩梦。当初刚入门的时候我的代码也是很多毛病，经不起这样的测试，后来渐渐地经验多了后，代码的健壮性逐渐提升，也明白其中比较重要的就是参数的校验。
+参数的使用有通过协议的接口调用（如http、rpc&amp;hellip;&amp;hellip;）、函数调用、库调用等等方式。
+其实对于http api的请求来说，现在很多web框架都已经自带了参数校验的功能，基本用起来都挺爽的，也无需多讲。
+而对于函数调用这样的常见方式，很多是要靠开发自己去校验参数的。如果仅仅是靠注释，在团队开发过程中，难免会有问题产生。起码我觉得，永远不要相信传过来的参数！
+OK，那么来讲讲这次的题目，就是Golang中的参数校验库——validator。
+用过Gin的小伙伴儿应该知道其binding参数验证器非常好用，其就是调用了validator。此处呢我们来介绍下validator的基础用法，和在一般场景下的应用案例。
+基础用法 介绍 validator包源码在github.com/go-playground/validator。其基于标记实现结构和单个字段的值验证，包含如下关键功能：
+使用验证标记或自定义验证程序进行跨字段和跨结构验证 Slice、Array和Map都可以允许验证多维字段的任何或者所有级别 能够深入查看映射键和值以进行验证 通过在验证之前确定类型接口的基础类型来处理类型接口 处理自定义字段类型 允许将多个验证映射到单个标记，以便在结构上更轻松地定义验证 提取自定义定义的字段名，例如，可以指定在验证时提取JSON名称，并使其在结果FieldError中可用 可定制的i18n错误消息 gin web框架的默认验证器 安装 1 go get github.com/go-playground/validator/v10 导入 1 import &amp;#34;github.'>
+<meta property='og:url' content='https://blog.hunterji.com/p/golang%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8validator%E6%A0%A1%E9%AA%8C%E5%8F%82%E6%95%B0/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Golang' /><meta property='article:published_time' content='2021-10-23T15:31:19&#43;00:00'/><meta property='article:modified_time' content='2021-10-23T15:31:19&#43;00:00'/>
+<meta name="twitter:title" content="Golang如何使用validator校验参数">
+<meta name="twitter:description" content="简介 关于测试工程师，有一个笑话，是这样的：
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 一个测试工程师走进一家酒吧，要了一杯啤酒 一个测试工程师走进一家酒吧，要了一杯咖啡 一个测试工程师走进一家酒吧，要了0.7杯啤酒 一个测试工程师走进一家酒吧，要了-1杯啤酒 一个测试工程师走进一家酒吧，要了2^32杯啤酒 一个测试工程师走进一家酒吧，要了一杯洗脚水 一个测试工程师走进一家酒吧，要了一杯蜥蜴 一个测试工程师走进一家酒吧，要了一份asdfQwer@24dg!&amp;amp;*(@ 一个测试工程师走进一家酒吧，什么也没要 一个测试工程师走进家酒吧，又走出去又从窗户进来又从后门出去从下水道钻进来 一个测试工程师走进家酒吧，又走出去又进来又出去又进来又出去，最后在外面把老板打了一顿 一个测试工程师走进一 一个测试工程师走进一家酒吧，要了一杯烫烫烫的锟斤拷 一个测试工程师走进一家酒吧，要了NaN杯Null 1T测试工程师冲进一家酒吧，要了500T啤酒咖啡洗脚水野猫狼牙棒奶茶 1T测试工程师把酒吧拆了 一个测试工程师化装成老板走进一家酒吧，要了500杯啤酒，并且不付钱 一万个测试工程师在酒吧外呼啸而过 一个测试工程师走进一家酒吧，要了一杯啤酒‘;DROPTABLE酒吧 测试工程师们满意地离开了酒吧 这个笑话估计也只有开发才明白其中的笑点与心酸吧。
+对于一些刚入门的开发来说，这简直就是噩梦。当初刚入门的时候我的代码也是很多毛病，经不起这样的测试，后来渐渐地经验多了后，代码的健壮性逐渐提升，也明白其中比较重要的就是参数的校验。
+参数的使用有通过协议的接口调用（如http、rpc&amp;hellip;&amp;hellip;）、函数调用、库调用等等方式。
+其实对于http api的请求来说，现在很多web框架都已经自带了参数校验的功能，基本用起来都挺爽的，也无需多讲。
+而对于函数调用这样的常见方式，很多是要靠开发自己去校验参数的。如果仅仅是靠注释，在团队开发过程中，难免会有问题产生。起码我觉得，永远不要相信传过来的参数！
+OK，那么来讲讲这次的题目，就是Golang中的参数校验库——validator。
+用过Gin的小伙伴儿应该知道其binding参数验证器非常好用，其就是调用了validator。此处呢我们来介绍下validator的基础用法，和在一般场景下的应用案例。
+基础用法 介绍 validator包源码在github.com/go-playground/validator。其基于标记实现结构和单个字段的值验证，包含如下关键功能：
+使用验证标记或自定义验证程序进行跨字段和跨结构验证 Slice、Array和Map都可以允许验证多维字段的任何或者所有级别 能够深入查看映射键和值以进行验证 通过在验证之前确定类型接口的基础类型来处理类型接口 处理自定义字段类型 允许将多个验证映射到单个标记，以便在结构上更轻松地定义验证 提取自定义定义的字段名，例如，可以指定在验证时提取JSON名称，并使其在结果FieldError中可用 可定制的i18n错误消息 gin web框架的默认验证器 安装 1 go get github.com/go-playground/validator/v10 导入 1 import &amp;#34;github.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#简介">简介</a></li>
+    <li><a href="#基础用法">基础用法</a>
+      <ol>
+        <li><a href="#介绍">介绍</a></li>
+        <li><a href="#安装">安装</a></li>
+        <li><a href="#导入">导入</a></li>
+        <li><a href="#验证规则">验证规则</a>
+          <ol>
+            <li><a href="#1比较">1）比较</a></li>
+            <li><a href="#2字段">2）字段</a></li>
+            <li><a href="#3网络">3）网络</a></li>
+            <li><a href="#4字符">4）字符</a></li>
+            <li><a href="#5格式">5）格式</a></li>
+            <li><a href="#6其它">6）其它</a></li>
+            <li><a href="#7别名">7）别名</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#案例">案例</a>
+      <ol>
+        <li><a href="#简单验证">简单验证</a></li>
+        <li><a href="#自定义验证">自定义验证</a></li>
+      </ol>
+    </li>
+    <li><a href="#最后">最后</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/golang%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8validator%E6%A0%A1%E9%AA%8C%E5%8F%82%E6%95%B0/">Golang如何使用validator校验参数</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 23, 2021</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="简介">简介</h2>
+<p>关于测试工程师，有一个笑话，是这样的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一杯啤酒
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一杯咖啡
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了0.7杯啤酒
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了-1杯啤酒
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了2^32杯啤酒
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一杯洗脚水
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一杯蜥蜴
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一份asdfQwer@24dg!&amp;*(@
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，什么也没要
+</span></span><span class="line"><span class="cl">一个测试工程师走进家酒吧，又走出去又从窗户进来又从后门出去从下水道钻进来
+</span></span><span class="line"><span class="cl">一个测试工程师走进家酒吧，又走出去又进来又出去又进来又出去，最后在外面把老板打了一顿
+</span></span><span class="line"><span class="cl">一个测试工程师走进一
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一杯烫烫烫的锟斤拷
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了NaN杯Null
+</span></span><span class="line"><span class="cl">1T测试工程师冲进一家酒吧，要了500T啤酒咖啡洗脚水野猫狼牙棒奶茶
+</span></span><span class="line"><span class="cl">1T测试工程师把酒吧拆了
+</span></span><span class="line"><span class="cl">一个测试工程师化装成老板走进一家酒吧，要了500杯啤酒，并且不付钱
+</span></span><span class="line"><span class="cl">一万个测试工程师在酒吧外呼啸而过
+</span></span><span class="line"><span class="cl">一个测试工程师走进一家酒吧，要了一杯啤酒‘;DROPTABLE酒吧
+</span></span><span class="line"><span class="cl">测试工程师们满意地离开了酒吧
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个笑话估计也只有开发才明白其中的笑点与心酸吧。</p>
+<p>对于一些刚入门的开发来说，这简直就是噩梦。当初刚入门的时候我的代码也是很多毛病，经不起这样的测试，后来渐渐地经验多了后，代码的健壮性逐渐提升，也明白其中比较重要的就是参数的校验。</p>
+<p>参数的使用有通过协议的接口调用（如http、rpc&hellip;&hellip;）、函数调用、库调用等等方式。</p>
+<p>其实对于http api的请求来说，现在很多web框架都已经自带了参数校验的功能，基本用起来都挺爽的，也无需多讲。</p>
+<p>而对于函数调用这样的常见方式，很多是要靠开发自己去校验参数的。如果仅仅是靠注释，在团队开发过程中，难免会有问题产生。起码我觉得，永远不要相信传过来的参数！</p>
+<p>OK，那么来讲讲这次的题目，就是Golang中的参数校验库——validator。</p>
+<p>用过Gin的小伙伴儿应该知道其<code>binding</code>参数验证器非常好用，其就是调用了validator。此处呢我们来介绍下validator的基础用法，和在一般场景下的应用案例。</p>
+<h2 id="基础用法">基础用法</h2>
+<h3 id="介绍">介绍</h3>
+<p><code>validator</code>包源码在<a class="link" href="https://github.com/go-playground/validator"  target="_blank" rel="noopener"
+    >github.com/go-playground/validator</a>。其基于标记实现结构和单个字段的值验证，包含如下关键功能：</p>
+<ul>
+<li>使用验证标记或自定义验证程序进行跨字段和跨结构验证</li>
+<li>Slice、Array和Map都可以允许验证多维字段的任何或者所有级别</li>
+<li>能够深入查看映射键和值以进行验证</li>
+<li>通过在验证之前确定类型接口的基础类型来处理类型接口</li>
+<li>处理自定义字段类型</li>
+<li>允许将多个验证映射到单个标记，以便在结构上更轻松地定义验证</li>
+<li>提取自定义定义的字段名，例如，可以指定在验证时提取JSON名称，并使其在结果FieldError中可用</li>
+<li>可定制的i18n错误消息</li>
+<li>gin web框架的默认验证器</li>
+</ul>
+<h3 id="安装">安装</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">go get github.com/go-playground/validator/v10
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="导入">导入</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;github.com/go-playground/validator/v10&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="验证规则">验证规则</h3>
+<p>此处从官方列举的各个类别中挑选部分举例说明。</p>
+<h4 id="1比较">1）比较</h4>
+<ul>
+<li><strong>eq</strong>：相等</li>
+<li><strong>gt</strong>：大于</li>
+<li><strong>gte</strong>：大于等于</li>
+<li><strong>lt</strong>：小于</li>
+<li><strong>lte</strong>：小于等于</li>
+<li><strong>ne</strong>：不等于</li>
+</ul>
+<h4 id="2字段">2）字段</h4>
+<p>此处的字段大部分可以理解为上面的比较的tag跟<code>field</code>拼接而成，而中间有<code>cs</code>的tag为跨struct比较。</p>
+<ul>
+<li><strong>eqfield</strong>(=Field)：必须等于Field的值</li>
+<li><strong>nefield</strong>(=Field)：必须不等于Field的值</li>
+<li><strong>gtfield</strong>(=Field)：必须大于Field的值</li>
+<li><strong>eqcsfield</strong>(=Other.Field)：必须等于struct Other中的Field的值</li>
+</ul>
+<h4 id="3网络">3）网络</h4>
+<ul>
+<li><strong>ip</strong>：网络协议地址IP</li>
+<li><strong>ip4_addr</strong>：网络协议地址IPv4</li>
+<li><strong>mac</strong>：mac地址</li>
+<li><strong>url</strong>：url</li>
+</ul>
+<h4 id="4字符">4）字符</h4>
+<ul>
+<li><strong>ascii</strong>：ASCII</li>
+<li><strong>boolean</strong>：Boolean</li>
+<li><strong>endswith</strong>： 以&hellip;结尾</li>
+<li><strong>contains</strong>：包含</li>
+<li><strong>uppercase</strong>：大写</li>
+</ul>
+<h4 id="5格式">5）格式</h4>
+<ul>
+<li><strong>base64</strong>：Base64字符串</li>
+<li><strong>base64url</strong>：Base64url字符串</li>
+<li><strong>email</strong>：邮箱字符串</li>
+<li><strong>json</strong>：JSON</li>
+<li><strong>jwt</strong>：JSON Web Token</li>
+<li><strong>latitude</strong>：纬度</li>
+</ul>
+<h4 id="6其它">6）其它</h4>
+<ul>
+<li><strong>len</strong>：长度</li>
+<li><strong>max</strong>：最大值</li>
+<li><strong>min</strong>：最小值</li>
+<li><strong>required</strong>：字段为必须，不可空</li>
+</ul>
+<h4 id="7别名">7）别名</h4>
+<ul>
+<li><strong>iscolor</strong>：hexcolor|rgb|rgba|hsl|hsla</li>
+<li><strong>country_code</strong>：iso3166_1_alpha2|iso3166_1_alpha3|iso3166_1_alpha_numeric</li>
+</ul>
+<h2 id="案例">案例</h2>
+<h3 id="简单验证">简单验证</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/go-playground/validator/v10&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">User</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Name</span>           <span class="kt">string</span>  <span class="s">`validate:&#34;required,lte=10&#34;`</span>                         <span class="c1">// 姓名 非空，长度小于等于10
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Age</span>            <span class="kt">int</span>     <span class="s">`validate:&#34;required,gte=18,lte=50&#34;`</span>                  <span class="c1">// 年龄 非空，数字大于等于18，小于等于50
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Email</span>          <span class="kt">string</span>  <span class="s">`validate:&#34;required,email&#34;`</span>                          <span class="c1">// 邮箱 非空，格式为email
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">FavouriteColor</span> <span class="kt">string</span>  <span class="s">`validate:&#34;iscolor&#34;`</span>                                 <span class="c1">// 喜欢的颜色 hexcolor|rgb|rgba|hsl|hsla的别名
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Password</span>       <span class="kt">string</span>  <span class="s">`validate:&#34;required,gte=16,lte=22&#34;`</span>                  <span class="c1">// 密码 非空，长度大于等于16，小于等于22
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">RePassword</span>     <span class="kt">string</span>  <span class="s">`validate:&#34;required,gte=16,lte=22,eqfield=Password&#34;`</span> <span class="c1">// 确认密码 非空，长度大于等于16，小于等于22，必须和字段Password相同
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Hobbies</span>        <span class="p">[]</span><span class="nx">Hobby</span> <span class="s">`validate:&#34;lte=5&#34;`</span>                                   <span class="c1">// 多个爱好 长度小于等于5
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Hobby</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Name</span> <span class="kt">string</span> <span class="s">`validate:&#34;lte=50&#34;`</span> <span class="c1">// 爱好名称 长度小于等于50
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">validate</span> <span class="o">*</span><span class="nx">validator</span><span class="p">.</span><span class="nx">Validate</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">validate</span> <span class="p">=</span> <span class="nx">validator</span><span class="p">.</span><span class="nf">New</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 该函数验证struct
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 不会报错
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">validateStruct</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 该函数单度验证字段
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 会报错
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">validateVariable</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">validateStruct</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">hobby</span> <span class="o">:=</span> <span class="nx">Hobby</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Name</span><span class="p">:</span> <span class="s">&#34;划水&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">user</span> <span class="o">:=</span> <span class="nx">User</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Name</span><span class="p">:</span>           <span class="s">&#34;张三&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Age</span><span class="p">:</span>            <span class="mi">48</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Email</span><span class="p">:</span>          <span class="s">&#34;hi.hunterji@gmail.com&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">FavouriteColor</span><span class="p">:</span> <span class="s">&#34;#ffffff&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Password</span><span class="p">:</span>       <span class="s">&#34;1234567890123456&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">RePassword</span><span class="p">:</span>     <span class="s">&#34;1234567890123456&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Hobbies</span><span class="p">:</span>        <span class="p">[]</span><span class="nx">Hobby</span><span class="p">{</span><span class="nx">hobby</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">validate</span><span class="p">.</span><span class="nf">Struct</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">validateVariable</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">email</span> <span class="o">:=</span> <span class="s">&#34;hi.hunterji@gmail.com&#34;</span> <span class="c1">// 此处邮箱地址格式写的是错误的，会导致报错
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">validate</span><span class="p">.</span><span class="nf">Var</span><span class="p">(</span><span class="nx">email</span><span class="p">,</span> <span class="s">&#34;required,email&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="自定义验证">自定义验证</h3>
+<p>自定义验证可以自己创建一个校验的函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 注册校验函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">ValidateMyVal</span><span class="p">(</span><span class="nx">fl</span> <span class="nx">validator</span><span class="p">.</span><span class="nx">FieldLevel</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">fl</span><span class="p">.</span><span class="nf">Field</span><span class="p">().</span><span class="nf">String</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#34;hello,world!&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后将其注册到validate上即可：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">validate</span> <span class="p">=</span> <span class="nx">validator</span><span class="p">.</span><span class="nf">New</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nx">validate</span><span class="p">.</span><span class="nf">RegisterValidation</span><span class="p">(</span><span class="s">&#34;is-hello&#34;</span><span class="p">,</span> <span class="nx">ValidateMyVal</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">s</span> <span class="o">:=</span> <span class="s">&#34;hello,kuari&#34;</span> <span class="c1">// 跟校验函数中的字符串不同，因此此处会报错
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">err</span> <span class="o">:=</span> <span class="nx">validate</span><span class="p">.</span><span class="nf">Var</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s">&#34;is-hello&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>自定义校验可以满足开发过程中的特殊场景，通过制定规范的校验标准，可以推进团队的协作和开发效率。</p>
+<h2 id="最后">最后</h2>
+<p>至此便是对于<code>validator</code>的介绍了。本文篇幅较短，管中窥豹而已，基本可以满足简单场景的使用。以及本文的案例也是基于官方的案例改的，让其稍微接地气点。若有兴趣的小伙伴还是建议去完整看一下官方的文档和案例，多样的用法可以满足多样的场景，在满足代码的健壮性的同时也能确保代码的优美。</p>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a class="link" href="https://github.com/go-playground/validator"  target="_blank" rel="noopener"
+    >go-playground/validator</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/golang/">Golang</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

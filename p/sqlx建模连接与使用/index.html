@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='前言 为什么要用sqlx而不是gorm呢？是因为orm学习成本比较高，当使用python时候需要使用sqlalchemy，遇到go就要换成gorm，换成别的语言就又有其他orm。而直接使用原生sql可以减少学习成本，适用于所有开发语言。其次，gorm本身支持软删除，但是其对软删除的支持上存在缺陷，在单条查询可以过滤软删除数据，但是在多条查询时无法有效过滤，就造成了有时候要手动过滤又有时候不要手动过滤，使用体验非常差。
+因此此处考虑去使用sqlx来直接调用原生sql。
+安装 1 go get github.com/jmoiron/sqlx 连接数据库 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 package database import ( &amp;#34;fmt&amp;#34; &amp;#34;os&amp;#34; _ &amp;#34;github.com/go-sql-driver/mysql&amp;#34; &amp;#34;github.com/jmoiron/sqlx&amp;#34; ) func DBConnect() *sqlx.DB { env := os.Getenv(&amp;#34;NODE_ENV&amp;#34;) var host, port, user, password, dbname string // 使用环境变量来切换生产和开发环境 if env == &amp;#34;production&amp;#34; { host = os.'>
+<title>sqlx建模、连接与使用</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/sqlx%E5%BB%BA%E6%A8%A1%E8%BF%9E%E6%8E%A5%E4%B8%8E%E4%BD%BF%E7%94%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='sqlx建模、连接与使用'>
+<meta property='og:description' content='前言 为什么要用sqlx而不是gorm呢？是因为orm学习成本比较高，当使用python时候需要使用sqlalchemy，遇到go就要换成gorm，换成别的语言就又有其他orm。而直接使用原生sql可以减少学习成本，适用于所有开发语言。其次，gorm本身支持软删除，但是其对软删除的支持上存在缺陷，在单条查询可以过滤软删除数据，但是在多条查询时无法有效过滤，就造成了有时候要手动过滤又有时候不要手动过滤，使用体验非常差。
+因此此处考虑去使用sqlx来直接调用原生sql。
+安装 1 go get github.com/jmoiron/sqlx 连接数据库 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 package database import ( &amp;#34;fmt&amp;#34; &amp;#34;os&amp;#34; _ &amp;#34;github.com/go-sql-driver/mysql&amp;#34; &amp;#34;github.com/jmoiron/sqlx&amp;#34; ) func DBConnect() *sqlx.DB { env := os.Getenv(&amp;#34;NODE_ENV&amp;#34;) var host, port, user, password, dbname string // 使用环境变量来切换生产和开发环境 if env == &amp;#34;production&amp;#34; { host = os.'>
+<meta property='og:url' content='https://blog.hunterji.com/p/sqlx%E5%BB%BA%E6%A8%A1%E8%BF%9E%E6%8E%A5%E4%B8%8E%E4%BD%BF%E7%94%A8/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Golang' /><meta property='article:published_time' content='2020-12-25T12:51:12&#43;00:00'/><meta property='article:modified_time' content='2020-12-25T12:51:12&#43;00:00'/>
+<meta name="twitter:title" content="sqlx建模、连接与使用">
+<meta name="twitter:description" content="前言 为什么要用sqlx而不是gorm呢？是因为orm学习成本比较高，当使用python时候需要使用sqlalchemy，遇到go就要换成gorm，换成别的语言就又有其他orm。而直接使用原生sql可以减少学习成本，适用于所有开发语言。其次，gorm本身支持软删除，但是其对软删除的支持上存在缺陷，在单条查询可以过滤软删除数据，但是在多条查询时无法有效过滤，就造成了有时候要手动过滤又有时候不要手动过滤，使用体验非常差。
+因此此处考虑去使用sqlx来直接调用原生sql。
+安装 1 go get github.com/jmoiron/sqlx 连接数据库 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 package database import ( &amp;#34;fmt&amp;#34; &amp;#34;os&amp;#34; _ &amp;#34;github.com/go-sql-driver/mysql&amp;#34; &amp;#34;github.com/jmoiron/sqlx&amp;#34; ) func DBConnect() *sqlx.DB { env := os.Getenv(&amp;#34;NODE_ENV&amp;#34;) var host, port, user, password, dbname string // 使用环境变量来切换生产和开发环境 if env == &amp;#34;production&amp;#34; { host = os.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#安装">安装</a></li>
+    <li><a href="#连接数据库">连接数据库</a></li>
+    <li><a href="#创建表和调用">创建表和调用</a>
+      <ol>
+        <li><a href="#创建表">创建表</a></li>
+        <li><a href="#创建struct">创建struct</a></li>
+        <li><a href="#封装方法">封装方法</a></li>
+      </ol>
+    </li>
+    <li><a href="#视图中使用">视图中使用</a>
+      <ol>
+        <li><a href="#调用封装的方法">调用封装的方法</a></li>
+        <li><a href="#直接使用">直接使用</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/sqlx%E5%BB%BA%E6%A8%A1%E8%BF%9E%E6%8E%A5%E4%B8%8E%E4%BD%BF%E7%94%A8/">sqlx建模、连接与使用</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Dec 25, 2020</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>为什么要用<code>sqlx</code>而不是<code>gorm</code>呢？是因为<code>orm</code>学习成本比较高，当使用<code>python</code>时候需要使用<code>sqlalchemy</code>，遇到<code>go</code>就要换成<code>gorm</code>，换成别的语言就又有其他orm。而直接使用原生<code>sql</code>可以减少学习成本，适用于所有开发语言。其次，<code>gorm</code>本身支持软删除，但是其对软删除的支持上存在缺陷，在单条查询可以过滤软删除数据，但是在多条查询时无法有效过滤，就造成了有时候要手动过滤又有时候不要手动过滤，使用体验非常差。</p>
+<p>因此此处考虑去使用<code>sqlx</code>来直接调用原生<code>sql</code>。</p>
+<h2 id="安装">安装</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">go</span> <span class="nx">get</span> <span class="nx">github</span><span class="p">.</span><span class="nx">com</span><span class="o">/</span><span class="nx">jmoiron</span><span class="o">/</span><span class="nx">sqlx</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="连接数据库">连接数据库</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">database</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;os&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">_</span> <span class="s">&#34;github.com/go-sql-driver/mysql&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/jmoiron/sqlx&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">DBConnect</span><span class="p">()</span> <span class="o">*</span><span class="nx">sqlx</span><span class="p">.</span><span class="nx">DB</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">env</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;NODE_ENV&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">host</span><span class="p">,</span> <span class="nx">port</span><span class="p">,</span> <span class="nx">user</span><span class="p">,</span> <span class="nx">password</span><span class="p">,</span> <span class="nx">dbname</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 使用环境变量来切换生产和开发环境
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="nx">env</span> <span class="o">==</span> <span class="s">&#34;production&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">host</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;dbHost&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">port</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;dbPort&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">user</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;dbUser&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">password</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;dbPassword&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">dbname</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;dbname&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">host</span> <span class="p">=</span> <span class="s">&#34;&lt;your-host&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">port</span> <span class="p">=</span> <span class="s">&#34;&lt;your-port&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">user</span> <span class="p">=</span> <span class="s">&#34;&lt;your-user&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">password</span> <span class="p">=</span> <span class="s">&#34;&lt;your-password&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">dbname</span> <span class="p">=</span> <span class="s">&#34;&lt;your-db-name&gt;&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">dbConfig</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;%s:%s@tcp(%s:%s)/%s?parseTime=true&#34;</span><span class="p">,</span> <span class="nx">user</span><span class="p">,</span> <span class="nx">password</span><span class="p">,</span> <span class="nx">host</span><span class="p">,</span> <span class="nx">port</span><span class="p">,</span> <span class="nx">dbname</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">db</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">sqlx</span><span class="p">.</span><span class="nf">Connect</span><span class="p">(</span><span class="s">&#34;mysql&#34;</span><span class="p">,</span> <span class="nx">dbConfig</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;failed to connect database&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">db</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="创建表和调用">创建表和调用</h2>
+<h3 id="创建表">创建表</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">exists</span><span class="w"> </span><span class="n">test_gin</span><span class="p">.</span><span class="n">todo</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">todo_id</span><span class="w">    </span><span class="nb">int</span><span class="w"> </span><span class="n">auto_increment</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">title</span><span class="w">      </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w">                          </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">comment</span><span class="w"> </span><span class="s1">&#39;todo标题&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">content</span><span class="w">    </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w">                         </span><span class="k">null</span><span class="w"> </span><span class="k">comment</span><span class="w"> </span><span class="s1">&#39;内容&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w">    </span><span class="nb">int</span><span class="w">                                  </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">comment</span><span class="w"> </span><span class="s1">&#39;用户id&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">created_at</span><span class="w"> </span><span class="k">timestamp</span><span class="w">  </span><span class="k">default</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">comment</span><span class="w"> </span><span class="s1">&#39;创建时间戳&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">updated_at</span><span class="w"> </span><span class="k">timestamp</span><span class="w">  </span><span class="k">default</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">comment</span><span class="w"> </span><span class="s1">&#39;更新时间戳&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">is_deleted</span><span class="w"> </span><span class="n">tinyint</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="mi">0</span><span class="w">                 </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">comment</span><span class="w"> </span><span class="s1">&#39;是否被删除,0:未删,1:已删&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="创建struct">创建struct</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Todo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">TodoID</span>    <span class="kt">int</span>    <span class="s">`db:&#34;todo_id&#34; json:&#34;todo_id,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Title</span>     <span class="kt">string</span> <span class="s">`db:&#34;title&#34; json:&#34;title,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Content</span>   <span class="kt">string</span> <span class="s">`db:&#34;content&#34; json:&#34;content,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">UserID</span>    <span class="kt">int</span>    <span class="s">`db:&#34;user_id&#34; json:&#34;user_id,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">CreatedAt</span> <span class="kt">string</span> <span class="s">`db:&#34;created_at&#34; json:&#34;created_at,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">UpdatedAt</span> <span class="kt">string</span> <span class="s">`db:&#34;updated_at&#34; json:&#34;updated_at,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">IsDeleted</span> <span class="kt">bool</span>   <span class="s">`db:&#34;is_deleted&#34; json:&#34;is_deleted,omitempty&#34;`</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="封装方法">封装方法</h3>
+<p>此处以增删为例。封装常用方法是为了复用，封装时候使用害羞的代码。不需要为了封装而封装。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 新增Todo
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">Todo</span><span class="p">)</span> <span class="nf">Add</span><span class="p">()</span> <span class="p">(</span><span class="nx">todoID</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 连接数据库
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">db</span> <span class="o">:=</span> <span class="nx">database</span><span class="p">.</span><span class="nf">DBConnect</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">defer</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 执行添加sql
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">tx</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">MustBegin</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">tx</span><span class="p">.</span><span class="nf">MustExec</span><span class="p">(</span><span class="s">&#34;insert into todo (title, content, user_id) value (?, ?, ?)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">t</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span> <span class="nx">t</span><span class="p">.</span><span class="nx">Content</span><span class="p">,</span> <span class="nx">t</span><span class="p">.</span><span class="nx">UserID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">lastTodoID</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">result</span><span class="p">.</span><span class="nf">LastInsertId</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">_</span> <span class="p">=</span> <span class="nx">tx</span><span class="p">.</span><span class="nf">Commit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">todoID</span> <span class="p">=</span> <span class="nb">int</span><span class="p">(</span><span class="nx">lastTodoID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 删除Todo
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">Todo</span><span class="p">)</span> <span class="nf">Del</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">db</span> <span class="o">:=</span> <span class="nx">database</span><span class="p">.</span><span class="nf">DBConnect</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">defer</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">tx</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">MustBegin</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">tx</span><span class="p">.</span><span class="nf">MustExec</span><span class="p">(</span><span class="s">&#34;update todo set is_deleted = 0 where is_deleted = 0 and todo_id = ?&#34;</span><span class="p">,</span> <span class="nx">t</span><span class="p">.</span><span class="nx">TodoID</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">_</span> <span class="p">=</span> <span class="nx">tx</span><span class="p">.</span><span class="nf">Commit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="视图中使用">视图中使用</h2>
+<p>此处以新增接口为例。</p>
+<h3 id="调用封装的方法">调用封装的方法</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">views</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/gin-gonic/gin&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;testGin/models&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// addTodo.go -- post
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">AddTodo</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// {&#34;title&#34;: &#34;hello&#34;, &#34;content&#34;: &#34;world&#34;}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kd">var</span> <span class="nx">requestBody</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Title</span>   <span class="kt">string</span> <span class="s">`json:&#34;title&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Content</span> <span class="kt">string</span> <span class="s">`json:&#34;content&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">c</span><span class="p">.</span><span class="nf">ShouldBind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">requestBody</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="s">&#34;code&#34;</span><span class="p">:</span>    <span class="mi">40000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="s">&#34;message&#34;</span><span class="p">:</span> <span class="s">&#34;参数有误&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">todo</span> <span class="o">:=</span> <span class="nx">models</span><span class="p">.</span><span class="nx">Todo</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Title</span><span class="p">:</span>   <span class="nx">requestBody</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Content</span><span class="p">:</span> <span class="nx">requestBody</span><span class="p">.</span><span class="nx">Content</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">UserID</span><span class="p">:</span>  <span class="mi">1</span><span class="p">,</span> <span class="c1">// 此处的1为假数据，此处应当从上下文获取请求用户的user_id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">todoID</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">todo</span><span class="p">.</span><span class="nf">Add</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="s">&#34;code&#34;</span><span class="p">:</span> <span class="mi">20001</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;code&#34;</span><span class="p">:</span>    <span class="mi">20000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;todo_id&#34;</span><span class="p">:</span> <span class="nx">todoID</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="直接使用">直接使用</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">views</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;github.com/gin-gonic/gin&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;testGin/database&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// addTodo.go -- post
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">AddTodo</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// {&#34;title&#34;: &#34;hello&#34;, &#34;content&#34;: &#34;world&#34;}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kd">var</span> <span class="nx">requestBody</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Title</span>   <span class="kt">string</span> <span class="s">`json:&#34;title&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Content</span> <span class="kt">string</span> <span class="s">`json:&#34;content&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">c</span><span class="p">.</span><span class="nf">ShouldBind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">requestBody</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="s">&#34;code&#34;</span><span class="p">:</span>    <span class="mi">40000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="s">&#34;message&#34;</span><span class="p">:</span> <span class="s">&#34;参数有误&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 连接数据库
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">db</span> <span class="o">:=</span> <span class="nx">database</span><span class="p">.</span><span class="nf">DBConnect</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">defer</span> <span class="nx">db</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 执行添加sql
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">tx</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nf">MustBegin</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">tx</span><span class="p">.</span><span class="nf">MustExec</span><span class="p">(</span><span class="s">&#34;insert into todo (title, content, user_id) value (?, ?, ?)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">requestBody</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span> <span class="nx">requestBody</span><span class="p">.</span><span class="nx">Content</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">lastTodoID</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">result</span><span class="p">.</span><span class="nf">LastInsertId</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="s">&#34;code&#34;</span><span class="p">:</span> <span class="mi">20001</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">_</span> <span class="p">=</span> <span class="nx">tx</span><span class="p">.</span><span class="nf">Commit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;code&#34;</span><span class="p">:</span>    <span class="mi">20000</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="s">&#34;todo_id&#34;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nx">lastTodoID</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">	<span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/golang/">Golang</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

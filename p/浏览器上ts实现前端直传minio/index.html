@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='前言 前端从后端获取到sts，然后直接minio，极大减少服务端的压力。
+当然，肯定会这种疑问，为什么不在后端生成临时签名url，给前端上传/下载呢？问就是业务需要 /狗头&amp;hellip;&amp;hellip;
+环境 minio: ^7.0.32 typescript: 4.9.5 浏览器上的坑 为什么标题上要强调“浏览器”呢？
+这是因为官方的minio.js，感觉当前版本并没有考虑浏览器的使用场景，无法直接在浏览器上直传。
+所以这里就是推荐一个折中的方案，可以在前端直传。
+当然了，如果业务允许，当前版本请直接在后端生成临时签名url吧！
+minio直传代码实现 安装minio.js 1 pnpm add -D minio 生成client 1 2 3 4 5 6 7 8 9 10 11 import * as Minio from &amp;#39;minio&amp;#39; const minioClient = new Minio.Client({ region: &amp;#39;cn-north-1&amp;#39;, // region字段，极其有必要加上！我在sts场景，不加region字段就报错权限不够/心累... endPoint: &amp;#39;192.168.1.1&amp;#39;, // minio的地址 port: 9000, // minio端口 useSSL: true, // 是否使用ssl accessKey, secretKey, sessionToken, // 可选字段，当为sts时，加入此字段 }) putObject直传方案 1 putObject(bucketName, objectName, stream) 官方提供的putObject方法，必填这三个字段，前两个很好理解，主要是第三个stream，需要详细看一下。'>
+<title>浏览器上ts实现前端直传minio</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%8Ats%E5%AE%9E%E7%8E%B0%E5%89%8D%E7%AB%AF%E7%9B%B4%E4%BC%A0minio/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='浏览器上ts实现前端直传minio'>
+<meta property='og:description' content='前言 前端从后端获取到sts，然后直接minio，极大减少服务端的压力。
+当然，肯定会这种疑问，为什么不在后端生成临时签名url，给前端上传/下载呢？问就是业务需要 /狗头&amp;hellip;&amp;hellip;
+环境 minio: ^7.0.32 typescript: 4.9.5 浏览器上的坑 为什么标题上要强调“浏览器”呢？
+这是因为官方的minio.js，感觉当前版本并没有考虑浏览器的使用场景，无法直接在浏览器上直传。
+所以这里就是推荐一个折中的方案，可以在前端直传。
+当然了，如果业务允许，当前版本请直接在后端生成临时签名url吧！
+minio直传代码实现 安装minio.js 1 pnpm add -D minio 生成client 1 2 3 4 5 6 7 8 9 10 11 import * as Minio from &amp;#39;minio&amp;#39; const minioClient = new Minio.Client({ region: &amp;#39;cn-north-1&amp;#39;, // region字段，极其有必要加上！我在sts场景，不加region字段就报错权限不够/心累... endPoint: &amp;#39;192.168.1.1&amp;#39;, // minio的地址 port: 9000, // minio端口 useSSL: true, // 是否使用ssl accessKey, secretKey, sessionToken, // 可选字段，当为sts时，加入此字段 }) putObject直传方案 1 putObject(bucketName, objectName, stream) 官方提供的putObject方法，必填这三个字段，前两个很好理解，主要是第三个stream，需要详细看一下。'>
+<meta property='og:url' content='https://blog.hunterji.com/p/%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%8Ats%E5%AE%9E%E7%8E%B0%E5%89%8D%E7%AB%AF%E7%9B%B4%E4%BC%A0minio/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='TypeScript' /><meta property='article:published_time' content='2023-02-17T13:31:56&#43;00:00'/><meta property='article:modified_time' content='2023-02-17T13:31:56&#43;00:00'/>
+<meta name="twitter:title" content="浏览器上ts实现前端直传minio">
+<meta name="twitter:description" content="前言 前端从后端获取到sts，然后直接minio，极大减少服务端的压力。
+当然，肯定会这种疑问，为什么不在后端生成临时签名url，给前端上传/下载呢？问就是业务需要 /狗头&amp;hellip;&amp;hellip;
+环境 minio: ^7.0.32 typescript: 4.9.5 浏览器上的坑 为什么标题上要强调“浏览器”呢？
+这是因为官方的minio.js，感觉当前版本并没有考虑浏览器的使用场景，无法直接在浏览器上直传。
+所以这里就是推荐一个折中的方案，可以在前端直传。
+当然了，如果业务允许，当前版本请直接在后端生成临时签名url吧！
+minio直传代码实现 安装minio.js 1 pnpm add -D minio 生成client 1 2 3 4 5 6 7 8 9 10 11 import * as Minio from &amp;#39;minio&amp;#39; const minioClient = new Minio.Client({ region: &amp;#39;cn-north-1&amp;#39;, // region字段，极其有必要加上！我在sts场景，不加region字段就报错权限不够/心累... endPoint: &amp;#39;192.168.1.1&amp;#39;, // minio的地址 port: 9000, // minio端口 useSSL: true, // 是否使用ssl accessKey, secretKey, sessionToken, // 可选字段，当为sts时，加入此字段 }) putObject直传方案 1 putObject(bucketName, objectName, stream) 官方提供的putObject方法，必填这三个字段，前两个很好理解，主要是第三个stream，需要详细看一下。">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#浏览器上的坑">浏览器上的坑</a></li>
+    <li><a href="#minio直传代码实现">minio直传代码实现</a>
+      <ol>
+        <li><a href="#安装miniojs">安装minio.js</a></li>
+        <li><a href="#生成client">生成client</a></li>
+        <li><a href="#putobject直传方案">putObject直传方案</a></li>
+        <li><a href="#折中方案">折中方案</a></li>
+      </ol>
+    </li>
+    <li><a href="#http请求url上传">http请求url上传</a>
+      <ol>
+        <li><a href="#请求上传">请求上传</a>
+          <ol>
+            <li><a href="#xmlhttprequest">XMLHttpRequest</a></li>
+            <li><a href="#fetch">Fetch</a></li>
+            <li><a href="#axios">Axios</a></li>
+          </ol>
+        </li>
+        <li><a href="#promise">Promise</a></li>
+        <li><a href="#事件响应">事件响应</a></li>
+        <li><a href="#取消上传">取消上传</a></li>
+      </ol>
+    </li>
+    <li><a href="#性能优化">性能优化</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%8Ats%E5%AE%9E%E7%8E%B0%E5%89%8D%E7%AB%AF%E7%9B%B4%E4%BC%A0minio/">浏览器上ts实现前端直传minio</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Feb 17, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>前端从后端获取到sts，然后直接minio，极大减少服务端的压力。</p>
+<p>当然，肯定会这种疑问，为什么不在后端生成临时签名url，给前端上传/下载呢？问就是业务需要 /狗头&hellip;&hellip;</p>
+<h2 id="环境">环境</h2>
+<ul>
+<li><em>minio</em>: ^7.0.32</li>
+<li><em>typescript</em>: 4.9.5</li>
+</ul>
+<h2 id="浏览器上的坑">浏览器上的坑</h2>
+<p>为什么标题上要强调“浏览器”呢？</p>
+<p>这是因为官方的minio.js，感觉当前版本并没有考虑浏览器的使用场景，无法直接在浏览器上直传。</p>
+<p>所以这里就是推荐一个折中的方案，可以在前端直传。</p>
+<p>当然了，如果业务允许，当前版本请直接在后端生成临时签名url吧！</p>
+<h2 id="minio直传代码实现">minio直传代码实现</h2>
+<h3 id="安装miniojs">安装minio.js</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">pnpm add -D minio
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="生成client">生成client</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">Minio</span> <span class="nx">from</span> <span class="s1">&#39;minio&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">minioClient</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Minio</span><span class="p">.</span><span class="nx">Client</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">region</span><span class="o">:</span> <span class="s1">&#39;cn-north-1&#39;</span><span class="p">,</span> <span class="c1">// region字段，极其有必要加上！我在sts场景，不加region字段就报错权限不够/心累...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">endPoint</span><span class="o">:</span> <span class="s1">&#39;192.168.1.1&#39;</span><span class="p">,</span> <span class="c1">// minio的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">port</span><span class="o">:</span> <span class="mi">9000</span><span class="p">,</span> <span class="c1">// minio端口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">useSSL</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="c1">// 是否使用ssl
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">accessKey</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">secretKey</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">sessionToken</span><span class="p">,</span> <span class="c1">// 可选字段，当为sts时，加入此字段
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">})</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="putobject直传方案">putObject直传方案</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">putObject</span><span class="p">(</span><span class="nx">bucketName</span><span class="p">,</span> <span class="nx">objectName</span><span class="p">,</span> <span class="nx">stream</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>官方提供的<code>putObject</code>方法，必填这三个字段，前两个很好理解，主要是第三个<code>stream</code>，需要详细看一下。</p>
+<p><code>stream</code>的类型是：<code>string | internal.Readable | Buffer</code></p>
+<p><code>string</code>很好搞定，直接<code>putObject(bucketName, 'hello.txt', 'hello,world!')</code>这样子上传文本文件。</p>
+<p>但是另外两个类型都是nodejs的啊&hellip;啊这&hellip;（也许是我错了，有大佬能够解决的请务必直接告诉我&hellip;）</p>
+<h3 id="折中方案">折中方案</h3>
+<p>那么折中的方案就是由前端生成临时签名url，再由前端进行上传 /哭。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">url</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">minioClient</span><span class="p">.</span><span class="nx">presignedPutObject</span><span class="p">(</span><span class="nx">bucketName</span><span class="p">,</span> <span class="nx">filename</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后利用http请求url进行上传即可。虽然比较曲折，但是目前相对比较好的前端解决方案。</p>
+<h2 id="http请求url上传">http请求url上传</h2>
+<p>此处介绍下http请求上传的相关操作。</p>
+<h3 id="请求上传">请求上传</h3>
+<p>请求上传可以有三种方案。</p>
+<h4 id="xmlhttprequest">XMLHttpRequest</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">xhrUploadFile</span> <span class="o">=</span> <span class="p">(</span><span class="nx">file</span><span class="o">:</span> <span class="nx">File</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="nx">string</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">xhr</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">file</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="mi">200</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> 上传成功`</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> 上传失败`</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="fetch">Fetch</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">fetchUploadFile</span> <span class="o">=</span> <span class="p">(</span><span class="nx">file</span><span class="o">:</span> <span class="nx">File</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="nx">string</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">method</span><span class="o">:</span> <span class="s1">&#39;PUT&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">body</span><span class="o">:</span> <span class="nx">file</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> 上传成功`</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> 上传失败`</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="axios">Axios</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">axiosUploadFile</span> <span class="o">=</span> <span class="p">(</span><span class="nx">file</span><span class="o">:</span> <span class="nx">File</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="nx">string</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">instance</span> <span class="o">=</span> <span class="nx">axios</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="nx">put</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">file</span><span class="p">,</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">headers</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s1">&#39;Content-Type&#39;</span><span class="o">:</span> <span class="nx">file</span><span class="p">.</span><span class="nx">type</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> 上传成功`</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> 上传失败`</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">});</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="promise">Promise</h3>
+<p>此处可以封装一下请求，叠加<code>promise</code>buff，此处以<code>XMLHttpRequest</code>为例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">uploadRequest</span> <span class="o">=</span> <span class="p">(</span><span class="nx">file</span><span class="o">:</span> <span class="nx">File</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="nx">string</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">xhr</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">xhr</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">xhr</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="mi">200</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">resolve</span><span class="p">(</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">response</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">reject</span><span class="p">(</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">status</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="事件响应">事件响应</h3>
+<p>要完成上传，怎么能没有响应事件呢。</p>
+<p>此处的事件包括：</p>
+<ul>
+<li>上传进度</li>
+<li>上传完成</li>
+<li>上传失败</li>
+</ul>
+<p>请求代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">uploadRequest</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">(</span><span class="nx">file</span><span class="o">:</span> <span class="nx">File</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="nx">string</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">xhr</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">upload</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;progress&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">onUploadProgress</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="p">((</span><span class="nx">e</span><span class="p">.</span><span class="nx">loaded</span> <span class="o">/</span> <span class="nx">e</span><span class="p">.</span><span class="nx">total</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">)</span> <span class="c1">// 更新进度，此处不保留小数点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="mi">200</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">onUploaded</span><span class="p">()</span> <span class="c1">// 响应上传完成事件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">onUploadErr</span><span class="p">((</span><span class="nx">error</span> <span class="nx">as</span> <span class="nb">Error</span><span class="p">).</span><span class="nx">message</span><span class="p">)</span> <span class="c1">// 响应上传错误，此处ts处理error
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="p">{</span> <span class="nx">onUploadErr</span><span class="p">(</span><span class="sb">`http code is </span><span class="si">${</span><span class="nx">xhr</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">`</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// 响应上传错误
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">xhr</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">file</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="取消上传">取消上传</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">xhr</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">xhr</span><span class="p">.</span><span class="nx">abort</span><span class="p">()</span> <span class="c1">// 取消上传
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="性能优化">性能优化</h2>
+<ul>
+<li>对于大文件，或者说需要后台运行的上传任务，可以使用web worker来跑</li>
+<li>对于大文件，可以使用切片的方式提高并发，切片的方式也可以实现断点续传，只是需要注意文件切片的顺序和唯一id</li>
+</ul>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a class="link" href="https://github.com/minio/minio-js"  target="_blank" rel="noopener"
+    >github.com/minio/minio-js</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/typescript/">TypeScript</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

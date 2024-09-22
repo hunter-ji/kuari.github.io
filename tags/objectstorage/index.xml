@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>ObjectStorage on 开发者小橙</title>
+        <link>https://blog.hunterji.com/tags/objectstorage/</link>
+        <description>Recent content in ObjectStorage on 开发者小橙</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Wed, 29 Sep 2021 09:22:22 +0000</lastBuildDate><atom:link href="https://blog.hunterji.com/tags/objectstorage/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>OSS花式解锁下载文件新姿势，你学废了吗？</title>
+        <link>https://blog.hunterji.com/p/oss%E8%8A%B1%E5%BC%8F%E8%A7%A3%E9%94%81%E4%B8%8B%E8%BD%BD%E6%96%87%E4%BB%B6%E6%96%B0%E5%A7%BF%E5%8A%BF%E4%BD%A0%E5%AD%A6%E5%BA%9F%E4%BA%86%E5%90%97/</link>
+        <pubDate>Wed, 29 Sep 2021 09:22:22 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/p/oss%E8%8A%B1%E5%BC%8F%E8%A7%A3%E9%94%81%E4%B8%8B%E8%BD%BD%E6%96%87%E4%BB%B6%E6%96%B0%E5%A7%BF%E5%8A%BF%E4%BD%A0%E5%AD%A6%E5%BA%9F%E4%BA%86%E5%90%97/</guid>
+        <description>&lt;h2 id=&#34;简介&#34;&gt;简介&lt;/h2&gt;
+&lt;p&gt;在上一篇文章——&lt;a class=&#34;link&#34; href=&#34;https://mp.weixin.qq.com/s/qpSWVymlWtwlb5WUd_1M7Q&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;前端文件花式直传OSS！后端：那我走？&lt;/a&gt;中聊了下文件上传的几种方案，这里我们再来聊一下文件下载的花式姿势。&lt;/p&gt;
+&lt;h2 id=&#34;精简版&#34;&gt;精简版&lt;/h2&gt;
+&lt;p&gt;最常见的方式，莫过于后端存储文件在服务器上，然后通过后端接口传给前端，如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guwoojpvg6j60lq068jrg02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;最简版&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;该方案对于小规模、成本较低的项目非常适用，开发也较为便捷。&lt;/p&gt;
+&lt;p&gt;而对于有性能要求的项目，可以通过砸钱加机器、分片下载等方案提升项目性能。如果可以的话，请砸钱加机器吧！&lt;/p&gt;
+&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guwq8edesqj60hq0bc75c02.jpg&#34; alt=&#34;截屏2021-09-28 下午9.58.10&#34; style=&#34;zoom:33%;&#34; /&gt;
+&lt;h2 id=&#34;中庸版&#34;&gt;中庸版&lt;/h2&gt;
+&lt;p&gt;相较于上一个方案，可以砸丢丢钱整个OSS，将文件存储在OSS上，毕竟OSS上行流量不收费，如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guwpuow9hnj60km0dc74n02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;中庸版直传&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;那么问题来了，OSS的下行流量不是收费的吗？！&lt;/p&gt;
+&lt;p&gt;OK，偷偷告诉各位一个省钱小妙招/狗头，OSS内网的下行流量是不收费的！因此，可以通过后端请求OSS，获取到文件/字符串后，将其以文件流/base64数据的方式返回给前端。这样就避免了下行流量的费用。如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guwp05f04jj60r3068glu02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;中庸版&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;不过问题又来了，这样就还是占用了后端服务器的资源，依然会是性能的一个瓶颈。&lt;/p&gt;
+&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guwq8of8qcj6076075dft02.jpg&#34; alt=&#34;截屏2021-09-28 下午10.12.06&#34; style=&#34;zoom:50%;&#34; /&gt;
+&lt;h2 id=&#34;性能版&#34;&gt;性能版&lt;/h2&gt;
+&lt;p&gt;基于上一个方案，可以再升级。砸丢丢钱，拉上CDN这老哥，利用CDN流量代替OSS的下行流量，既能让前端直接请求OSS资源，不占用服务器资源，也降低了成本。如图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guwplrnpu2j60r20dc3z102.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;性能版&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在优先性能的情况下，该方案是较优的。&lt;/p&gt;
+&lt;p&gt;要说缺点的话，就是CDN配置吧，需要买域名和SSL证书等，不过一次购买，后续使用体验会非常棒。CDN除了可以代替OSS的下行流量外，其优点不要太多，比如说CDN可以文件缓存、可以调度至加速节点等。&lt;/p&gt;
+&lt;p&gt;涉及到OSS的私有Bucket的话，只需要使用CDN的访问控制即可。其也只需要通过后端实现加密，生成文件访问URL给前端直接访问。&lt;/p&gt;
+&lt;p&gt;或许你会存在疑问，看上去挺麻烦的啊！但是看看CDN的价格，你肯定会有不一样的想法的。&lt;/p&gt;
+&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1gux8jydxbdj608v09agly02.jpg&#34; alt=&#34;截屏2021-09-28 下午10.37.14&#34; style=&#34;zoom:50%;&#34; /&gt;</description>
+        </item>
+        <item>
+        <title>前端文件花式直传OSS！后端：那我走？</title>
+        <link>https://blog.hunterji.com/p/%E5%89%8D%E7%AB%AF%E6%96%87%E4%BB%B6%E8%8A%B1%E5%BC%8F%E7%9B%B4%E4%BC%A0oss%E5%90%8E%E7%AB%AF%E9%82%A3%E6%88%91%E8%B5%B0/</link>
+        <pubDate>Tue, 28 Sep 2021 09:53:18 +0000</pubDate>
+        
+        <guid>https://blog.hunterji.com/p/%E5%89%8D%E7%AB%AF%E6%96%87%E4%BB%B6%E8%8A%B1%E5%BC%8F%E7%9B%B4%E4%BC%A0oss%E5%90%8E%E7%AB%AF%E9%82%A3%E6%88%91%E8%B5%B0/</guid>
+        <description>&lt;h2 id=&#34;简介&#34;&gt;简介&lt;/h2&gt;
+&lt;p&gt;前端还在传文件给后端吗？你们的服务器扛得住吗？什么&amp;hellip;&amp;hellip;老板砸钱加机器？！告辞！/狗头&lt;/p&gt;
+&lt;p&gt;前后端文件传输涉及数据较大，往往会成为很多项目的性能瓶颈。常见的传输方式也有不少，相对来说，OSS直传能够减轻很大压力。&lt;/p&gt;
+&lt;p&gt;本文我们来列举下常见的和oss直传的几种传输方式，并列举其优劣。&lt;/p&gt;
+&lt;h2 id=&#34;常见方式&#34;&gt;常见方式&lt;/h2&gt;
+&lt;h3 id=&#34;表单上传&#34;&gt;表单上传&lt;/h3&gt;
+&lt;p&gt;表单上传文件是最常见的方式，前后端开发小伙伴都很轻松，前端哐哐传，后端哐哐收就成了。其过程如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guw3hw7k3uj60ix06q74b02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;form上传&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优势：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;简单方便，开发量小&lt;/li&gt;
+&lt;li&gt;前后端原生支持，无需额外第三方库支持&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;base64上传&#34;&gt;Base64上传&lt;/h3&gt;
+&lt;p&gt;Base64方式上传文件，多常见于小文件，如小图片等，前后端都可直接使用&lt;code&gt;String&lt;/code&gt;类型发送和接收。不过在前端，需要将文件转成base64数据，不仅会增加些性能消耗，还会增加传输数据的体积。而对于后端，如果并不是想直接存储base64数据，也还需要将其转成文件再存储，也会增加后端的性能消耗。&lt;/p&gt;
+&lt;p&gt;该上传方式可适用于&lt;code&gt;Resetful Api&lt;/code&gt;，也可适用于文件的加密、回调接口携带文件等等。其过程如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guvkwpx4d9j60ix06q74d02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;base64上传&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;优势：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;适用于&lt;code&gt;Resetful Api&lt;/code&gt;，可用于加密、回调等场景，较为灵活&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;劣势：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;前后端文件与base64数据转换需要消耗性能&lt;/li&gt;
+&lt;li&gt;只适用于小文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;oss直传&#34;&gt;OSS直传&lt;/h2&gt;
+&lt;p&gt;此处的OSS直传方案都是使用的阿里云的OSS产品，以下将介绍三个方案，可适用于不同的场景。&lt;/p&gt;
+&lt;h3 id=&#34;browserjs-sdk上传&#34;&gt;Browser.js SDK上传&lt;/h3&gt;
+&lt;p&gt;该方案可在前端直接通过&lt;code&gt;browser.js&lt;/code&gt;上传文件到OSS，可分成三步：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;前端使用SDK直传OSS&lt;/li&gt;
+&lt;li&gt;前端上传完成后请求后端，通知上传完成&lt;/li&gt;
+&lt;li&gt;后端检测OSS上该文件是否存在（可选）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;其流程如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guvlvyap7zj60lc0crjru02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;browser直传&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Browser.js&lt;/code&gt;的方式需要前端安装阿里云的库&lt;code&gt;ali-oss&lt;/code&gt;，然后在前端调用。直传还需要OSS账户的Key和Secret，因此为了安全考虑，需要建立RAM账户，然后前端向后端先请求一个&lt;code&gt;STS&lt;/code&gt;临时访问凭证来完成直传，其流程如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guvlvuqm2bj60lc0cr0tb02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;browser直传2&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;javascript客户端签名直传&#34;&gt;Javascript客户端签名直传&lt;/h3&gt;
+&lt;p&gt;Javascript客户端签名直传，需要先从后端获取临时签名，其流程与上一步的&lt;code&gt;browser.js&lt;/code&gt;方案大致相同，不同点在于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;无需第三方库支持，直接表单上传&lt;/li&gt;
+&lt;li&gt;原生支持后端上传回调（下一步骤讲述）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其流程如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guvm1snim8j60lc0crgm202.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;javascript签名直传&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;不过该方案做下来，我感觉最大的问题是权限配置有点麻烦&amp;hellip;&amp;hellip;/泪眼&lt;/p&gt;
+&lt;h3 id=&#34;服务端签名直传并设置上传回调&#34;&gt;服务端签名直传并设置上传回调&lt;/h3&gt;
+&lt;p&gt;该方案其实是上面方案——Javascript客户端签名直传的升级版本，其加上了后端的上传回调功能。不错呦～&lt;/p&gt;
+&lt;p&gt;前端需要改动的很少，只需要在请求参数中加上&lt;code&gt;callback&lt;/code&gt;参数即可，该参数为后端加密，在签名请求的响应中一起返回回来，内加密了后端回调接口。在前端直传完成后，后端回调接口将会接收到相关文件参数，包括文件路径、大小、类型等。最后OSS会将回调接口response转发给前端，响应直传OSS的请求。&lt;/p&gt;
+&lt;p&gt;其流程如下图所示。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://tva1.sinaimg.cn/large/008i3skNgy1guvmceaql3j60lc0craak02.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;后端签名直传且回调&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;对比&#34;&gt;对比&lt;/h2&gt;
+&lt;p&gt;传统方式相比直传OSS，相对来说有三个缺点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;上传慢：用户数据需先上传到应用服务器，之后再上传到OSS。网络传输时间比直传到OSS多一倍。如果用户数据不通过应用服务器中转，而是直传到OSS，速度将大大提升。而且OSS采用BGP带宽，能保证各地各运营商之间的传输速度。&lt;/li&gt;
+&lt;li&gt;扩展性差：如果后续用户多了，应用服务器会成为瓶颈。&lt;/li&gt;
+&lt;li&gt;费用高：需要准备多台应用服务器。由于OSS上传流量是免费的，如果数据直传到OSS，不通过应用服务器，那么将能省下几台应用服务器。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当然，对于规模较小、成本较低的项目来说，常见的上传方式还是适合的，毕竟没有最好的，只有最适合的。&lt;/p&gt;
+&lt;h2 id=&#34;参考文档&#34;&gt;参考文档&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://help.aliyun.com/document_detail/112718.html?spm=5176.22414175.sslink.2.3fc92aca2CzF4n&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Web端上传介绍&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://help.aliyun.com/document_detail/31925.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;JavaScript客户端签名直传&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://help.aliyun.com/document_detail/267439.html?spm=a2c4g.11186623.0.0.13415d3fbA6bxA&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;服务端签名直传并设置上传回调&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

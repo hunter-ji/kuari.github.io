@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='前言 这篇文章是我写的第一篇Swift UI相关的笔记吧。
+这真的难搞哦，毕竟新出来的。国内文档真的是少之又少，国外的文档也真不多，基本搜出来的都是UIKit的。官方文档，也是一言难尽，基本就处于，我要实现一个功能，然后去搜一下各种帖子，筛选掉无用的帖子，找到有用的点，当然也是时常根本找不到有用的帖子，然后就要去油管上看各种教程，然后发现：哦！原来还有这个方法！接着去官方文档搜一下，看一下属性，自己调用调用&amp;hellip;&amp;hellip;
+光是这个core data我就折腾了近一周，最后发现，原来还是官方好呀&amp;hellip;..
+吐槽一下自学swift ui，现在进入正题了。
+core data呢，是苹果官方的本地数据库，但是其存储的文件其实是sqlite文件。其可以通过icloud实现备份和同步，当然icloud我会额外写一篇文档来详细讲述的（又是一把辛酸泪&amp;hellip;）。
+环境 如下是我当前的环境：
+系统：macOS Big Sur 11.4 Xcode：Version 12.5 (12E262) Swift：5.4 操作步骤 创建项目 在创建项目的时候，可以直接选择Use Core Data选项，xcode会直接在ContentView.swift中生成一个相关demo。
+查看相关文件 创建之后，查看文件目录，相对于不选择Use Core Data，会多出如下几个文件：
+.xcdatamodeId Persistence.swift 创建core data表 点击&amp;lt;Your-Project-Name&amp;gt;.xcdatamodeId文件，进入页面。
+可以看到页面内有默认的CONFIGURATIONS为Default，默认的ENITITIES为Item，可以理解为分别对应sql中的库和表。
+然后点击Item，可以看到其字段，有默认的timestamp字段。
+若要新增ENTITIES（表），点击底部的Add Entity按钮即可。
+若要新增Attributes（字段），点击右侧Attributes中的&#43;即可，注意字段要选择类型。
+比如，此处以默认的Item为例，新增username和age两个字段。
+代码层面操作core data 1）查看 1 2 3 4 5 6 7 8 @Environment(\.managedObjectContext) private var viewContext @FetchRequest( sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)], animation: .default) private var items: FetchedResults&amp;lt;Item&amp;gt; // body中便利items即可 2）新增 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 private func addItem() { withAnimation { let newItem = Item(context: viewContext) newItem.'>
+<title>Swift UI项目调用core data</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/swift-ui%E9%A1%B9%E7%9B%AE%E8%B0%83%E7%94%A8core-data/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='Swift UI项目调用core data'>
+<meta property='og:description' content='前言 这篇文章是我写的第一篇Swift UI相关的笔记吧。
+这真的难搞哦，毕竟新出来的。国内文档真的是少之又少，国外的文档也真不多，基本搜出来的都是UIKit的。官方文档，也是一言难尽，基本就处于，我要实现一个功能，然后去搜一下各种帖子，筛选掉无用的帖子，找到有用的点，当然也是时常根本找不到有用的帖子，然后就要去油管上看各种教程，然后发现：哦！原来还有这个方法！接着去官方文档搜一下，看一下属性，自己调用调用&amp;hellip;&amp;hellip;
+光是这个core data我就折腾了近一周，最后发现，原来还是官方好呀&amp;hellip;..
+吐槽一下自学swift ui，现在进入正题了。
+core data呢，是苹果官方的本地数据库，但是其存储的文件其实是sqlite文件。其可以通过icloud实现备份和同步，当然icloud我会额外写一篇文档来详细讲述的（又是一把辛酸泪&amp;hellip;）。
+环境 如下是我当前的环境：
+系统：macOS Big Sur 11.4 Xcode：Version 12.5 (12E262) Swift：5.4 操作步骤 创建项目 在创建项目的时候，可以直接选择Use Core Data选项，xcode会直接在ContentView.swift中生成一个相关demo。
+查看相关文件 创建之后，查看文件目录，相对于不选择Use Core Data，会多出如下几个文件：
+.xcdatamodeId Persistence.swift 创建core data表 点击&amp;lt;Your-Project-Name&amp;gt;.xcdatamodeId文件，进入页面。
+可以看到页面内有默认的CONFIGURATIONS为Default，默认的ENITITIES为Item，可以理解为分别对应sql中的库和表。
+然后点击Item，可以看到其字段，有默认的timestamp字段。
+若要新增ENTITIES（表），点击底部的Add Entity按钮即可。
+若要新增Attributes（字段），点击右侧Attributes中的&#43;即可，注意字段要选择类型。
+比如，此处以默认的Item为例，新增username和age两个字段。
+代码层面操作core data 1）查看 1 2 3 4 5 6 7 8 @Environment(\.managedObjectContext) private var viewContext @FetchRequest( sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)], animation: .default) private var items: FetchedResults&amp;lt;Item&amp;gt; // body中便利items即可 2）新增 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 private func addItem() { withAnimation { let newItem = Item(context: viewContext) newItem.'>
+<meta property='og:url' content='https://blog.hunterji.com/p/swift-ui%E9%A1%B9%E7%9B%AE%E8%B0%83%E7%94%A8core-data/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Swift' /><meta property='article:published_time' content='2021-06-07T11:24:22&#43;00:00'/><meta property='article:modified_time' content='2021-06-07T11:24:22&#43;00:00'/>
+<meta name="twitter:title" content="Swift UI项目调用core data">
+<meta name="twitter:description" content="前言 这篇文章是我写的第一篇Swift UI相关的笔记吧。
+这真的难搞哦，毕竟新出来的。国内文档真的是少之又少，国外的文档也真不多，基本搜出来的都是UIKit的。官方文档，也是一言难尽，基本就处于，我要实现一个功能，然后去搜一下各种帖子，筛选掉无用的帖子，找到有用的点，当然也是时常根本找不到有用的帖子，然后就要去油管上看各种教程，然后发现：哦！原来还有这个方法！接着去官方文档搜一下，看一下属性，自己调用调用&amp;hellip;&amp;hellip;
+光是这个core data我就折腾了近一周，最后发现，原来还是官方好呀&amp;hellip;..
+吐槽一下自学swift ui，现在进入正题了。
+core data呢，是苹果官方的本地数据库，但是其存储的文件其实是sqlite文件。其可以通过icloud实现备份和同步，当然icloud我会额外写一篇文档来详细讲述的（又是一把辛酸泪&amp;hellip;）。
+环境 如下是我当前的环境：
+系统：macOS Big Sur 11.4 Xcode：Version 12.5 (12E262) Swift：5.4 操作步骤 创建项目 在创建项目的时候，可以直接选择Use Core Data选项，xcode会直接在ContentView.swift中生成一个相关demo。
+查看相关文件 创建之后，查看文件目录，相对于不选择Use Core Data，会多出如下几个文件：
+.xcdatamodeId Persistence.swift 创建core data表 点击&amp;lt;Your-Project-Name&amp;gt;.xcdatamodeId文件，进入页面。
+可以看到页面内有默认的CONFIGURATIONS为Default，默认的ENITITIES为Item，可以理解为分别对应sql中的库和表。
+然后点击Item，可以看到其字段，有默认的timestamp字段。
+若要新增ENTITIES（表），点击底部的Add Entity按钮即可。
+若要新增Attributes（字段），点击右侧Attributes中的&#43;即可，注意字段要选择类型。
+比如，此处以默认的Item为例，新增username和age两个字段。
+代码层面操作core data 1）查看 1 2 3 4 5 6 7 8 @Environment(\.managedObjectContext) private var viewContext @FetchRequest( sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)], animation: .default) private var items: FetchedResults&amp;lt;Item&amp;gt; // body中便利items即可 2）新增 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 private func addItem() { withAnimation { let newItem = Item(context: viewContext) newItem.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#操作步骤">操作步骤</a>
+      <ol>
+        <li><a href="#创建项目">创建项目</a></li>
+        <li><a href="#查看相关文件">查看相关文件</a></li>
+        <li><a href="#创建core-data表">创建core data表</a></li>
+        <li><a href="#代码层面操作core-data">代码层面操作core data</a>
+          <ol>
+            <li><a href="#1查看">1）查看</a></li>
+            <li><a href="#2新增">2）新增</a></li>
+            <li><a href="#3删除">3）删除</a></li>
+            <li><a href="#4汇总">4）汇总</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#结语">结语</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/swift-ui%E9%A1%B9%E7%9B%AE%E8%B0%83%E7%94%A8core-data/">Swift UI项目调用core data</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 07, 2021</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>这篇文章是我写的第一篇Swift UI相关的笔记吧。</p>
+<p>这真的难搞哦，毕竟新出来的。国内文档真的是少之又少，国外的文档也真不多，基本搜出来的都是UIKit的。官方文档，也是一言难尽，基本就处于，我要实现一个功能，然后去搜一下各种帖子，筛选掉无用的帖子，找到有用的点，当然也是时常根本找不到有用的帖子，然后就要去油管上看各种教程，然后发现：哦！原来还有这个方法！接着去官方文档搜一下，看一下属性，自己调用调用&hellip;&hellip;</p>
+<p>光是这个core data我就折腾了近一周，最后发现，原来还是官方好呀&hellip;..</p>
+<p>吐槽一下自学swift ui，现在进入正题了。</p>
+<p>core data呢，是苹果官方的本地数据库，但是其存储的文件其实是<code>sqlite</code>文件。其可以通过icloud实现备份和同步，当然icloud我会额外写一篇文档来详细讲述的（又是一把辛酸泪&hellip;）。</p>
+<h2 id="环境">环境</h2>
+<p>如下是我当前的环境：</p>
+<ul>
+<li>系统：macOS Big Sur 11.4</li>
+<li>Xcode：Version 12.5 (12E262)</li>
+<li>Swift：5.4</li>
+</ul>
+<h2 id="操作步骤">操作步骤</h2>
+<h3 id="创建项目">创建项目</h3>
+<p>在创建项目的时候，可以直接选择<code>Use Core Data</code>选项，xcode会直接在<code>ContentView.swift</code>中生成一个相关demo。</p>
+<p><img src="/../assets/create_swiftui_project.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="创建项目时候截图"
+	
+	
+></p>
+<h3 id="查看相关文件">查看相关文件</h3>
+<p>创建之后，查看文件目录，相对于不选择<code>Use Core Data</code>，会多出如下几个文件：</p>
+<ul>
+<li><Your-Project-Name>.xcdatamodeId</li>
+<li>Persistence.swift</li>
+</ul>
+<h3 id="创建core-data表">创建core data表</h3>
+<p>点击<code>&lt;Your-Project-Name&gt;.xcdatamodeId</code>文件，进入页面。</p>
+<p>可以看到页面内有默认的<code>CONFIGURATIONS</code>为<code>Default</code>，默认的<code>ENITITIES</code>为<code>Item</code>，可以理解为分别对应sql中的库和表。</p>
+<p><img src="/../assets/swiftui_core_data_page.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="swiftui_core_data_page.png"
+	
+	
+></p>
+<p>然后点击<code>Item</code>，可以看到其字段，有默认的<code>timestamp</code>字段。</p>
+<p>若要新增<code>ENTITIES</code>（表），点击底部的<code>Add Entity</code>按钮即可。</p>
+<p>若要新增<code>Attributes</code>（字段），点击右侧<code>Attributes</code>中的<code>+</code>即可，注意字段要选择类型。</p>
+<p>比如，此处以默认的<code>Item</code>为例，新增<code>username</code>和<code>age</code>两个字段。</p>
+<p><img src="/../assets/swiftui_core_data_create_attributes.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="swiftui_core_data_create_attributes.png"
+	
+	
+></p>
+<h3 id="代码层面操作core-data">代码层面操作core data</h3>
+<h4 id="1查看">1）查看</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-swift" data-lang="swift"><span class="line"><span class="cl"><span class="p">@</span><span class="n">Environment</span><span class="p">(</span><span class="err">\</span><span class="p">.</span><span class="n">managedObjectContext</span><span class="p">)</span> <span class="kd">private</span> <span class="kd">var</span> <span class="nv">viewContext</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">@</span><span class="n">FetchRequest</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="n">sortDescriptors</span><span class="p">:</span> <span class="p">[</span><span class="n">NSSortDescriptor</span><span class="p">(</span><span class="n">keyPath</span><span class="p">:</span> <span class="err">\</span><span class="n">Item</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">ascending</span><span class="p">:</span> <span class="kc">true</span><span class="p">)],</span>
+</span></span><span class="line"><span class="cl">  <span class="n">animation</span><span class="p">:</span> <span class="p">.</span><span class="k">default</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">var</span> <span class="nv">items</span><span class="p">:</span> <span class="n">FetchedResults</span><span class="p">&lt;</span><span class="n">Item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// body中便利items即可</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="2新增">2）新增</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-swift" data-lang="swift"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">func</span> <span class="nf">addItem</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">withAnimation</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nv">newItem</span> <span class="p">=</span> <span class="n">Item</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">viewContext</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">newItem</span><span class="p">.</span><span class="n">timestamp</span> <span class="p">=</span> <span class="n">Date</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">try</span> <span class="n">viewContext</span><span class="p">.</span><span class="n">save</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// Replace this implementation with code to handle the error appropriately.</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">let</span> <span class="nv">nsError</span> <span class="p">=</span> <span class="n">error</span> <span class="k">as</span> <span class="n">NSError</span>
+</span></span><span class="line"><span class="cl">      <span class="bp">fatalError</span><span class="p">(</span><span class="s">&#34;Unresolved error </span><span class="si">\(</span><span class="n">nsError</span><span class="si">)</span><span class="s">, </span><span class="si">\(</span><span class="n">nsError</span><span class="p">.</span><span class="n">userInfo</span><span class="si">)</span><span class="s">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如上是xcode自动生成的新增函数，若是要自定义添加字段可以这样改动下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-swift" data-lang="swift"><span class="line"><span class="cl"><span class="c1">// 此处按照如上添加Attributes修改，具体修改按照项目具体情况</span>
+</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">func</span> <span class="nf">addItem</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="nb">Int16</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">withAnimation</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nv">newItem</span> <span class="p">=</span> <span class="n">Item</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">viewContext</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">newItem</span><span class="p">.</span><span class="n">username</span> <span class="p">=</span> <span class="n">username</span>
+</span></span><span class="line"><span class="cl">    <span class="n">newItem</span><span class="p">.</span><span class="n">age</span> <span class="p">=</span> <span class="n">age</span>
+</span></span><span class="line"><span class="cl">    <span class="n">newItem</span><span class="p">.</span><span class="n">timestamp</span> <span class="p">=</span> <span class="n">Date</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">try</span> <span class="n">viewContext</span><span class="p">.</span><span class="n">save</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// Replace this implementation with code to handle the error appropriately.</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">let</span> <span class="nv">nsError</span> <span class="p">=</span> <span class="n">error</span> <span class="k">as</span> <span class="n">NSError</span>
+</span></span><span class="line"><span class="cl">      <span class="bp">fatalError</span><span class="p">(</span><span class="s">&#34;Unresolved error </span><span class="si">\(</span><span class="n">nsError</span><span class="si">)</span><span class="s">, </span><span class="si">\(</span><span class="n">nsError</span><span class="p">.</span><span class="n">userInfo</span><span class="si">)</span><span class="s">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="3删除">3）删除</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-swift" data-lang="swift"><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">func</span> <span class="nf">deleteItems</span><span class="p">(</span><span class="n">offsets</span><span class="p">:</span> <span class="n">IndexSet</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">withAnimation</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">offsets</span><span class="p">.</span><span class="bp">map</span> <span class="p">{</span> <span class="n">items</span><span class="p">[</span><span class="nv">$0</span><span class="p">]</span> <span class="p">}.</span><span class="n">forEach</span><span class="p">(</span><span class="n">viewContext</span><span class="p">.</span><span class="n">delete</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">try</span> <span class="n">viewContext</span><span class="p">.</span><span class="n">save</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// Replace this implementation with code to handle the error appropriately.</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">let</span> <span class="nv">nsError</span> <span class="p">=</span> <span class="n">error</span> <span class="k">as</span> <span class="n">NSError</span>
+</span></span><span class="line"><span class="cl">      <span class="bp">fatalError</span><span class="p">(</span><span class="s">&#34;Unresolved error </span><span class="si">\(</span><span class="n">nsError</span><span class="si">)</span><span class="s">, </span><span class="si">\(</span><span class="n">nsError</span><span class="p">.</span><span class="n">userInfo</span><span class="si">)</span><span class="s">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="4汇总">4）汇总</h4>
+<p>在默认生成代码中，有一个<code>toolbar</code>，其在<code>macos</code>中可以生效，但是在<code>ios</code>中只有<code>EditionButton()</code>可以使用，为了方便演示，此处新增一个<code>Button</code>来添加数据。</p>
+<p>其次有点要声明下，在xcode中写代码时，右侧的<code>canvas</code>会实时渲染，列表中出现的数据并不是<code>core data</code>中的数据，而是默认生成的<code>Persistence.swift</code>中生成的演示数据，只能看看，不能当真。只有在模拟器/实体机编译运行时才能操作<code>core data</code>。</p>
+<p>如下为修改过后的<code>ContentView.swift</code>文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-swift" data-lang="swift"><span class="line"><span class="cl"><span class="c1">//</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//  ContentView.swift</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//  HelloKuari</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//  Created by Kuari on 2021/6/5.</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">import</span> <span class="nc">SwiftUI</span>
+</span></span><span class="line"><span class="cl"><span class="kd">import</span> <span class="nc">CoreData</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">struct</span> <span class="nc">ContentView</span><span class="p">:</span> <span class="n">View</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">@</span><span class="n">Environment</span><span class="p">(</span><span class="err">\</span><span class="p">.</span><span class="n">managedObjectContext</span><span class="p">)</span> <span class="kd">private</span> <span class="kd">var</span> <span class="nv">viewContext</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="p">@</span><span class="n">FetchRequest</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sortDescriptors</span><span class="p">:</span> <span class="p">[</span><span class="n">NSSortDescriptor</span><span class="p">(</span><span class="n">keyPath</span><span class="p">:</span> <span class="err">\</span><span class="n">Item</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">ascending</span><span class="p">:</span> <span class="kc">true</span><span class="p">)],</span>
+</span></span><span class="line"><span class="cl">        <span class="n">animation</span><span class="p">:</span> <span class="p">.</span><span class="k">default</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">var</span> <span class="nv">items</span><span class="p">:</span> <span class="n">FetchedResults</span><span class="p">&lt;</span><span class="n">Item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nv">body</span><span class="p">:</span> <span class="n">some</span> <span class="n">View</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="n">VStack</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">List</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">ForEach</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="p">{</span> <span class="n">item</span> <span class="k">in</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Text</span><span class="p">(</span><span class="s">&#34;Tom: </span><span class="si">\(</span><span class="n">item</span><span class="p">.</span><span class="n">username</span><span class="p">!</span><span class="si">)</span><span class="s"> age: </span><span class="si">\(</span><span class="n">item</span><span class="p">.</span><span class="n">age</span><span class="si">)</span><span class="s"> time :  </span><span class="si">\(</span><span class="n">item</span><span class="p">.</span><span class="n">timestamp</span><span class="p">!,</span> <span class="n">formatter</span><span class="p">:</span> <span class="n">itemFormatter</span><span class="si">)</span><span class="s">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="n">onDelete</span><span class="p">(</span><span class="n">perform</span><span class="p">:</span> <span class="n">deleteItems</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">// 新增一个按钮来添加数据</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Button</span><span class="p">(</span><span class="n">action</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">addItem</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="s">&#34;tom&#34;</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="mi">12</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">},</span> <span class="n">label</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Text</span><span class="p">(</span><span class="s">&#34;Add Item&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">})</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">func</span> <span class="nf">addItem</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="nb">Int16</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">withAnimation</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">let</span> <span class="nv">newItem</span> <span class="p">=</span> <span class="n">Item</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">viewContext</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newItem</span><span class="p">.</span><span class="n">username</span> <span class="p">=</span> <span class="n">username</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newItem</span><span class="p">.</span><span class="n">age</span> <span class="p">=</span> <span class="n">age</span>
+</span></span><span class="line"><span class="cl">            <span class="n">newItem</span><span class="p">.</span><span class="n">timestamp</span> <span class="p">=</span> <span class="n">Date</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">try</span> <span class="n">viewContext</span><span class="p">.</span><span class="n">save</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// Replace this implementation with code to handle the error appropriately.</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.</span>
+</span></span><span class="line"><span class="cl">                <span class="kd">let</span> <span class="nv">nsError</span> <span class="p">=</span> <span class="n">error</span> <span class="k">as</span> <span class="n">NSError</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">fatalError</span><span class="p">(</span><span class="s">&#34;Unresolved error </span><span class="si">\(</span><span class="n">nsError</span><span class="si">)</span><span class="s">, </span><span class="si">\(</span><span class="n">nsError</span><span class="p">.</span><span class="n">userInfo</span><span class="si">)</span><span class="s">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">func</span> <span class="nf">deleteItems</span><span class="p">(</span><span class="n">offsets</span><span class="p">:</span> <span class="n">IndexSet</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">withAnimation</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">offsets</span><span class="p">.</span><span class="bp">map</span> <span class="p">{</span> <span class="n">items</span><span class="p">[</span><span class="nv">$0</span><span class="p">]</span> <span class="p">}.</span><span class="n">forEach</span><span class="p">(</span><span class="n">viewContext</span><span class="p">.</span><span class="n">delete</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">try</span> <span class="n">viewContext</span><span class="p">.</span><span class="n">save</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// Replace this implementation with code to handle the error appropriately.</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.</span>
+</span></span><span class="line"><span class="cl">                <span class="kd">let</span> <span class="nv">nsError</span> <span class="p">=</span> <span class="n">error</span> <span class="k">as</span> <span class="n">NSError</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">fatalError</span><span class="p">(</span><span class="s">&#34;Unresolved error </span><span class="si">\(</span><span class="n">nsError</span><span class="si">)</span><span class="s">, </span><span class="si">\(</span><span class="n">nsError</span><span class="p">.</span><span class="n">userInfo</span><span class="si">)</span><span class="s">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="kd">let</span> <span class="nv">itemFormatter</span><span class="p">:</span> <span class="n">DateFormatter</span> <span class="p">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">let</span> <span class="nv">formatter</span> <span class="p">=</span> <span class="n">DateFormatter</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">formatter</span><span class="p">.</span><span class="n">dateStyle</span> <span class="p">=</span> <span class="p">.</span><span class="n">short</span>
+</span></span><span class="line"><span class="cl">    <span class="n">formatter</span><span class="p">.</span><span class="n">timeStyle</span> <span class="p">=</span> <span class="p">.</span><span class="n">medium</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">formatter</span>
+</span></span><span class="line"><span class="cl"><span class="p">}()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">struct</span> <span class="nc">ContentView_Previews</span><span class="p">:</span> <span class="n">PreviewProvider</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">static</span> <span class="kd">var</span> <span class="nv">previews</span><span class="p">:</span> <span class="n">some</span> <span class="n">View</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ContentView</span><span class="p">().</span><span class="n">environment</span><span class="p">(</span><span class="err">\</span><span class="p">.</span><span class="n">managedObjectContext</span><span class="p">,</span> <span class="n">PersistenceController</span><span class="p">.</span><span class="n">preview</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">viewContext</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后点击左侧顶部的运行按钮，编译运行。</p>
+<p>一开始是空白一片，点击<code>Add Item</code>按钮之后，便会开始添加数据。</p>
+<img src="../assets/swiftui_core_data_add_item_demo.png" alt="swiftui_core_data_add_item_demo.png" style="zoom:50%;" />
+<p>对于记录右滑即可删除，其为<code>List</code>的<code>onDelete</code>方法。</p>
+<h2 id="结语">结语</h2>
+<p>该文章是面向新手的，也是记录下我踩过的坑，因为目前文档匮乏，身边也没swift的开发小伙伴儿，只能靠自己摸索，若有大佬有更好的方法，真的还请不吝赐教。</p>
+<p>后面持续记录踩坑中&hellip;&hellip;</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/swift/">Swift</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

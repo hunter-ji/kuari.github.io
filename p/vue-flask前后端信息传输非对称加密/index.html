@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='介绍 为了前后端传输数据的安全性，需要对数据进行加密。因此选定使用非对称加密，此处为RSA。
+在传输数据前，后端生成公钥和私钥，将公钥给前端，前端加密之后，将密文传给后端，后端使用私钥解密即可得到原始的数据。
+环境 前端使用jsencrypt加密 后端使用Crypto生成密钥和解密 后端生成密钥 1 2 3 4 5 6 7 8 9 10 11 12 from Crypto.PublicKey import RSA def generate_key(): &amp;#34;&amp;#34;&amp;#34; 生成公钥和私钥 :return: 返回私钥和公钥 &amp;#34;&amp;#34;&amp;#34; rsa = RSA.generate(1024) private_key = rsa.exportKey() publick_key = rsa.publickey().exportKey() return private_key.decode(), publick_key.decode() 前端用公钥加密 1 2 3 4 5 6 7 8 9 10 11 12 13 14 import { JSEncrypt } from &amp;#34;jsencrypt&amp;#34;; function rsa_en(pubkey, target_str) { /** 分段加密信息 :params target_str: 需要加密的信息，此处为很长的信息 :pubkey: 公钥 :return: 存储密文的数组 **/ let encrypt = new JSEncrypt(); encrypt.'>
+<title>vue&#43;flask前后端信息传输非对称加密</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/vue-flask%E5%89%8D%E5%90%8E%E7%AB%AF%E4%BF%A1%E6%81%AF%E4%BC%A0%E8%BE%93%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='vue&#43;flask前后端信息传输非对称加密'>
+<meta property='og:description' content='介绍 为了前后端传输数据的安全性，需要对数据进行加密。因此选定使用非对称加密，此处为RSA。
+在传输数据前，后端生成公钥和私钥，将公钥给前端，前端加密之后，将密文传给后端，后端使用私钥解密即可得到原始的数据。
+环境 前端使用jsencrypt加密 后端使用Crypto生成密钥和解密 后端生成密钥 1 2 3 4 5 6 7 8 9 10 11 12 from Crypto.PublicKey import RSA def generate_key(): &amp;#34;&amp;#34;&amp;#34; 生成公钥和私钥 :return: 返回私钥和公钥 &amp;#34;&amp;#34;&amp;#34; rsa = RSA.generate(1024) private_key = rsa.exportKey() publick_key = rsa.publickey().exportKey() return private_key.decode(), publick_key.decode() 前端用公钥加密 1 2 3 4 5 6 7 8 9 10 11 12 13 14 import { JSEncrypt } from &amp;#34;jsencrypt&amp;#34;; function rsa_en(pubkey, target_str) { /** 分段加密信息 :params target_str: 需要加密的信息，此处为很长的信息 :pubkey: 公钥 :return: 存储密文的数组 **/ let encrypt = new JSEncrypt(); encrypt.'>
+<meta property='og:url' content='https://blog.hunterji.com/p/vue-flask%E5%89%8D%E5%90%8E%E7%AB%AF%E4%BF%A1%E6%81%AF%E4%BC%A0%E8%BE%93%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Vue' /><meta property='article:tag' content='Python' /><meta property='article:published_time' content='2020-05-22T15:11:05&#43;00:00'/><meta property='article:modified_time' content='2020-05-22T15:11:05&#43;00:00'/>
+<meta name="twitter:title" content="vue&#43;flask前后端信息传输非对称加密">
+<meta name="twitter:description" content="介绍 为了前后端传输数据的安全性，需要对数据进行加密。因此选定使用非对称加密，此处为RSA。
+在传输数据前，后端生成公钥和私钥，将公钥给前端，前端加密之后，将密文传给后端，后端使用私钥解密即可得到原始的数据。
+环境 前端使用jsencrypt加密 后端使用Crypto生成密钥和解密 后端生成密钥 1 2 3 4 5 6 7 8 9 10 11 12 from Crypto.PublicKey import RSA def generate_key(): &amp;#34;&amp;#34;&amp;#34; 生成公钥和私钥 :return: 返回私钥和公钥 &amp;#34;&amp;#34;&amp;#34; rsa = RSA.generate(1024) private_key = rsa.exportKey() publick_key = rsa.publickey().exportKey() return private_key.decode(), publick_key.decode() 前端用公钥加密 1 2 3 4 5 6 7 8 9 10 11 12 13 14 import { JSEncrypt } from &amp;#34;jsencrypt&amp;#34;; function rsa_en(pubkey, target_str) { /** 分段加密信息 :params target_str: 需要加密的信息，此处为很长的信息 :pubkey: 公钥 :return: 存储密文的数组 **/ let encrypt = new JSEncrypt(); encrypt.">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#介绍">介绍</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#后端生成密钥">后端生成密钥</a></li>
+    <li><a href="#前端用公钥加密">前端用公钥加密</a></li>
+    <li><a href="#后端使用私钥解密">后端使用私钥解密</a></li>
+    <li><a href="#完整代码">完整代码</a>
+      <ol>
+        <li><a href="#前端">前端</a></li>
+        <li><a href="#后端">后端</a></li>
+      </ol>
+    </li>
+    <li><a href="#分段加密">分段加密</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/vue-flask%E5%89%8D%E5%90%8E%E7%AB%AF%E4%BF%A1%E6%81%AF%E4%BC%A0%E8%BE%93%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/">vue&#43;flask前后端信息传输非对称加密</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">May 22, 2020</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="介绍">介绍</h2>
+<p>为了前后端传输数据的安全性，需要对数据进行加密。因此选定使用非对称加密，此处为<code>RSA</code>。</p>
+<p>在传输数据前，后端生成公钥和私钥，将公钥给前端，前端加密之后，将密文传给后端，后端使用私钥解密即可得到原始的数据。</p>
+<h2 id="环境">环境</h2>
+<ul>
+<li><strong>前端</strong>使用<code>jsencrypt</code>加密</li>
+<li><strong>后端</strong>使用<code>Crypto</code>生成密钥和解密</li>
+</ul>
+<h2 id="后端生成密钥">后端生成密钥</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.PublicKey</span> <span class="kn">import</span> <span class="n">RSA</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">generate_key</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    生成公钥和私钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">    
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :return: 返回私钥和公钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">rsa</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">private_key</span> <span class="o">=</span> <span class="n">rsa</span><span class="o">.</span><span class="n">exportKey</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">publick_key</span> <span class="o">=</span> <span class="n">rsa</span><span class="o">.</span><span class="n">publickey</span><span class="p">()</span><span class="o">.</span><span class="n">exportKey</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">private_key</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="n">publick_key</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="前端用公钥加密">前端用公钥加密</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">JSEncrypt</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">&#34;jsencrypt&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">function</span> <span class="nx">rsa_en</span><span class="p">(</span><span class="nx">pubkey</span><span class="p">,</span> <span class="nx">target_str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/** 
+</span></span></span><span class="line"><span class="cl"><span class="cm">  分段加密信息
+</span></span></span><span class="line"><span class="cl"><span class="cm">  
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :params target_str: 需要加密的信息，此处为很长的信息
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :pubkey: 公钥
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :return: 存储密文的数组
+</span></span></span><span class="line"><span class="cl"><span class="cm">  **/</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">let</span> <span class="nx">encrypt</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSEncrypt</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">encrypt</span><span class="p">.</span><span class="nx">setPublicKey</span><span class="p">(</span><span class="nx">pubkey</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">let</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">encrypt</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">target_str</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="后端使用私钥解密">后端使用私钥解密</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.PublicKey</span> <span class="kn">import</span> <span class="n">RSA</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.Cipher</span> <span class="kn">import</span> <span class="n">PKCS1_v1_5</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.Hash</span> <span class="kn">import</span> <span class="n">SHA</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto</span> <span class="kn">import</span> <span class="n">Random</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64decode</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">rsa_decrypt</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    rsa解密函数
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :prams private_key: 私钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :params message: 加密后的密文
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :return: 解密后原始信息
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dsize</span> <span class="o">=</span> <span class="n">SHA</span><span class="o">.</span><span class="n">digest_size</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sentinel</span> <span class="o">=</span> <span class="n">Random</span><span class="o">.</span><span class="n">new</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span> <span class="o">+</span> <span class="n">dsize</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">private_key</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">import_key</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cipher_rsa</span> <span class="o">=</span> <span class="n">PKCS1_v1_5</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">cipher_rsa</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">b64decode</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">sentinel</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>这里使用<code>base64</code>先解密一遍是必要的，否则报错<code>ValueError: Ciphertext with incorrect length.</code></li>
+</ul>
+<h2 id="完整代码">完整代码</h2>
+<h3 id="前端">前端</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">JSEncrypt</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">&#34;jsencrypt&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">function</span> <span class="nx">rsa_en</span><span class="p">(</span><span class="nx">pubkey</span><span class="p">,</span> <span class="nx">target_str</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/** 
+</span></span></span><span class="line"><span class="cl"><span class="cm">  分段加密信息
+</span></span></span><span class="line"><span class="cl"><span class="cm">  
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :params target_str: 需要加密的信息，此处为很长的信息
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :pubkey: 公钥
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :return: 存储密文的数组
+</span></span></span><span class="line"><span class="cl"><span class="cm">  **/</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">let</span> <span class="nx">encrypt</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSEncrypt</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">encrypt</span><span class="p">.</span><span class="nx">setPublicKey</span><span class="p">(</span><span class="nx">pubkey</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">let</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">encrypt</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">target_str</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="后端">后端</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.PublicKey</span> <span class="kn">import</span> <span class="n">RSA</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.Cipher</span> <span class="kn">import</span> <span class="n">PKCS1_v1_5</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto.Hash</span> <span class="kn">import</span> <span class="n">SHA</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">Crypto</span> <span class="kn">import</span> <span class="n">Random</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64decode</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">generate_key</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    生成公钥和私钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :return: 返回私钥和公钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">rsa</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">private_key</span> <span class="o">=</span> <span class="n">rsa</span><span class="o">.</span><span class="n">exportKey</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">publick_key</span> <span class="o">=</span> <span class="n">rsa</span><span class="o">.</span><span class="n">publickey</span><span class="p">()</span><span class="o">.</span><span class="n">exportKey</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">private_key</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="n">publick_key</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">rsa_encrypt</span><span class="p">(</span><span class="n">public_key</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    rsa加密函数
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :params publick_key: 公钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :params message: 需要加密的信息
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :return: 加密后的密文
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">public_key</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">import_key</span><span class="p">(</span><span class="n">public_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cipher_rsa</span> <span class="o">=</span> <span class="n">PKCS1_v1_5</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">public_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">cipher_rsa</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">rsa_decrypt</span><span class="p">(</span><span class="n">private_key</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    rsa解密函数
+</span></span></span><span class="line"><span class="cl"><span class="s2">
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :prams private_key: 私钥
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :params message: 加密后的密文
+</span></span></span><span class="line"><span class="cl"><span class="s2">    :return: 解密后原始信息
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dsize</span> <span class="o">=</span> <span class="n">SHA</span><span class="o">.</span><span class="n">digest_size</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sentinel</span> <span class="o">=</span> <span class="n">Random</span><span class="o">.</span><span class="n">new</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span> <span class="o">+</span> <span class="n">dsize</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">private_key</span> <span class="o">=</span> <span class="n">RSA</span><span class="o">.</span><span class="n">import_key</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cipher_rsa</span> <span class="o">=</span> <span class="n">PKCS1_v1_5</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">cipher_rsa</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">b64decode</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="n">sentinel</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="分段加密">分段加密</h2>
+<p><code>RSA</code>加密信息最长为<code>128</code>位，过长则会报错，因此，对于过长的信息需要分段加密，后端也要分段解密后拼装。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">JSEncrypt</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">&#34;jsencrypt&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">function</span> <span class="nx">en_str</span><span class="p">(</span><span class="nx">target_str</span><span class="p">,</span> <span class="nx">pubkey</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/** 
+</span></span></span><span class="line"><span class="cl"><span class="cm">  分段加密信息
+</span></span></span><span class="line"><span class="cl"><span class="cm">  
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :params target_str: 需要加密的信息，此处为很长的信息
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :pubkey: 公钥
+</span></span></span><span class="line"><span class="cl"><span class="cm">  :return: 存储密文的数组
+</span></span></span><span class="line"><span class="cl"><span class="cm">  **/</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">let</span> <span class="nx">encrypt</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">JSEncrypt</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">encrypt</span><span class="p">.</span><span class="nx">setPublicKey</span><span class="p">(</span><span class="nx">pubkey</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">let</span> <span class="nx">en_array</span> <span class="o">=</span> <span class="p">[];</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">let</span> <span class="nx">n</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span> <span class="c1">// 每段信息的长度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">l</span> <span class="o">=</span> <span class="nx">target_str</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span> <span class="o">/</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="kd">let</span> <span class="nx">message</span> <span class="o">=</span> <span class="nx">target_str</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">n</span> <span class="o">*</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">n</span> <span class="o">*</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">en_array</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">encrypt</span><span class="p">.</span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">message</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">en_array</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/vue/">Vue</a>
+        
+            <a href="/tags/python/">Python</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

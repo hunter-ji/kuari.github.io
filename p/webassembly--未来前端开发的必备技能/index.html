@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='WebAssembly是一种新的编码方式，可以在现代的网络浏览器中运行，它也被设计为可以与 JavaScript 共存，允许两者一起工作。'>
+<title>WebAssembly -- 未来前端开发的必备技能</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='WebAssembly -- 未来前端开发的必备技能'>
+<meta property='og:description' content='WebAssembly是一种新的编码方式，可以在现代的网络浏览器中运行，它也被设计为可以与 JavaScript 共存，允许两者一起工作。'>
+<meta property='og:url' content='https://blog.hunterji.com/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='WebAssembly' /><meta property='article:tag' content='Golang' /><meta property='article:published_time' content='2023-02-09T13:15:34&#43;00:00'/><meta property='article:modified_time' content='2023-02-09T13:15:34&#43;00:00'/><meta property='og:image' content='https://blog.hunterji.com/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/cover.jpg' />
+<meta name="twitter:title" content="WebAssembly -- 未来前端开发的必备技能">
+<meta name="twitter:description" content="WebAssembly是一种新的编码方式，可以在现代的网络浏览器中运行，它也被设计为可以与 JavaScript 共存，允许两者一起工作。"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://blog.hunterji.com/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/cover.jpg' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#快速上手">快速上手</a>
+      <ol>
+        <li><a href="#用go写一个hello-world">用go写一个hello world</a></li>
+        <li><a href="#将go文件编译成wasm文件">将go文件编译成wasm文件</a></li>
+        <li><a href="#拷贝出wasm_execjs">拷贝出wasm_exec.js</a></li>
+        <li><a href="#html文件调用wasm文件">html文件调用wasm文件</a></li>
+        <li><a href="#验证调用">验证调用</a></li>
+      </ol>
+    </li>
+    <li><a href="#go与js的类型转换">go与js的类型转换</a>
+      <ol>
+        <li><a href="#类型映射">类型映射</a></li>
+        <li><a href="#函数转换数组">函数转换数组</a></li>
+        <li><a href="#其余类型">其余类型</a></li>
+        <li><a href="#极端情况">极端情况</a></li>
+      </ol>
+    </li>
+    <li><a href="#js调用go函数">js调用go函数</a>
+      <ol>
+        <li><a href="#注册go函数">注册go函数</a></li>
+        <li><a href="#js调用">js调用</a></li>
+      </ol>
+    </li>
+    <li><a href="#go调用js函数">go调用js函数</a>
+      <ol>
+        <li><a href="#定义js函数">定义js函数</a></li>
+        <li><a href="#go中调用js函数">go中调用js函数</a></li>
+        <li><a href="#引入wasm">引入wasm</a></li>
+        <li><a href="#结果">结果</a></li>
+      </ol>
+    </li>
+    <li><a href="#回调函数解决go函数阻塞问题">回调函数/解决go函数阻塞问题</a>
+      <ol>
+        <li><a href="#注册函数">注册函数</a></li>
+        <li><a href="#js调用-1">js调用</a></li>
+        <li><a href="#输出">输出</a></li>
+      </ol>
+    </li>
+    <li><a href="#go实现promise">Go实现Promise</a>
+      <ol>
+        <li><a href="#注册函数-1">注册函数</a></li>
+        <li><a href="#js调用-2">js调用</a></li>
+        <li><a href="#输出-1">输出</a></li>
+      </ol>
+    </li>
+    <li><a href="#操作dom">操作DOM</a>
+      <ol>
+        <li><a href="#使用document">使用document</a></li>
+        <li><a href="#获取元素">获取元素</a></li>
+        <li><a href="#创建元素">创建元素</a></li>
+        <li><a href="#添加子元素">添加子元素</a></li>
+        <li><a href="#添加事件">添加事件</a></li>
+      </ol>
+    </li>
+    <li><a href="#canvas">Canvas</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/">
+                <img src="/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/cover_hu18c5fb7037479757471f623d2395d33e_660360_800x0_resize_q75_box.jpg"
+                        srcset="/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/cover_hu18c5fb7037479757471f623d2395d33e_660360_800x0_resize_q75_box.jpg 800w, /p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/cover_hu18c5fb7037479757471f623d2395d33e_660360_1600x0_resize_q75_box.jpg 1600w"
+                        width="800" 
+                        height="450" 
+                        loading="lazy"
+                        alt="Featured image of post WebAssembly -- 未来前端开发的必备技能" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/">WebAssembly -- 未来前端开发的必备技能</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            WebAssembly是一种新的编码方式，可以在现代的网络浏览器中运行，它也被设计为可以与 JavaScript 共存，允许两者一起工作。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Feb 09, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p><a class="link" href="https://developer.mozilla.org/zh-CN/docs/WebAssembly"  target="_blank" rel="noopener"
+    >WebAssembly</a> 是一种新的编码方式，可以在现代的网络浏览器中运行 － 它是一种低级的类汇编语言，具有紧凑的二进制格式，可以接近原生的性能运行，并为诸如 C / C ++等语言提供一个编译目标，以便它们可以在 Web 上运行。它也被设计为可以与 JavaScript 共存，允许两者一起工作。</p>
+<h2 id="快速上手">快速上手</h2>
+<h3 id="用go写一个hello-world">用go写一个hello world</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello, WebAssembly!&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="将go文件编译成wasm文件">将go文件编译成wasm文件</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">GOOS</span><span class="o">=</span>js <span class="nv">GOARCH</span><span class="o">=</span>wasm go build -o static/main.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="拷贝出wasm_execjs">拷贝出wasm_exec.js</h3>
+<p>该文件为go的wasm的js支持文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">cp <span class="s2">&#34;</span><span class="k">$(</span>go env GOROOT<span class="k">)</span><span class="s2">/misc/wasm/wasm_exec.js&#34;</span> static
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="html文件调用wasm文件">html文件调用wasm文件</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;static/wasm_exec.js&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">go</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Go</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">WebAssembly</span><span class="p">.</span><span class="nx">instantiateStreaming</span><span class="p">(</span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&#34;static/main.wasm&#34;</span><span class="p">),</span> <span class="nx">go</span><span class="p">.</span><span class="nx">importObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">go</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">instance</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="验证调用">验证调用</h3>
+<p>浏览器加载html文件，f12打开控制台，可以看到wasm的打印消息。</p>
+<h2 id="go与js的类型转换">go与js的类型转换</h2>
+<h3 id="类型映射">类型映射</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">| Go                     | JavaScript             |
+</span></span><span class="line"><span class="cl">| ---------------------- | ---------------------- |
+</span></span><span class="line"><span class="cl">| js.Value               | [its value]            |
+</span></span><span class="line"><span class="cl">| js.Func                | function               |
+</span></span><span class="line"><span class="cl">| nil                    | null                   |
+</span></span><span class="line"><span class="cl">| bool                   | boolean                |
+</span></span><span class="line"><span class="cl">| integers and floats    | number                 |
+</span></span><span class="line"><span class="cl">| string                 | string                 |
+</span></span><span class="line"><span class="cl">| []interface{}          | new array              |
+</span></span><span class="line"><span class="cl">| map[string]interface{} | new object             |
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如上为官方给出的go与js的类型映射表。</p>
+<p>比如在go中调用js函数，参数为<code>array</code>，那么就可以直接将go的<code>[]interface{}</code>类型的变量作为参数使用。</p>
+<h3 id="函数转换数组">函数转换数组</h3>
+<p><code>syscall/js</code>提供了两个函数：</p>
+<ul>
+<li>CopyBytesToGo：<code>func CopyBytesToGo(dst []byte, src Value) int</code></li>
+<li>CopyBytesToJS：<code>func CopyBytesToJS(dst Value, src []byte) int</code></li>
+</ul>
+<p>两者对于go而言，类型都是<code>[]byte</code>，但是对于js而言，需要<code>Uint8Array</code>或者<code>Uint8ClampedArray</code>类型，否则就会报错。</p>
+<p>那么，如何在go中生成一个<code>Uint8Array</code>或者<code>Uint8ClampedArray</code>类型的变量呢？官方的类型映射表也没有啊&hellip;那么就看下一步。</p>
+<h3 id="其余类型">其余类型</h3>
+<p>对于非官方类型映射表内的类型，和官方提供的两个数据类型转换之外的类型，可以通过一种通用的方式来生成，以上一步的<code>Uint8Array</code>为例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">js</span><span class="p">.</span><span class="nx">Global</span><span class="p">().</span><span class="nx">Get</span><span class="p">(</span><span class="s2">&#34;Uint8Array&#34;</span><span class="p">).</span><span class="nx">New</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">length</span><span class="o">&gt;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>实际使用案例：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="c1">// goData []byte{...}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">jsData</span> <span class="o">:=</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Global</span><span class="p">().</span><span class="nx">Get</span><span class="p">(</span><span class="s2">&#34;Uint8Array&#34;</span><span class="p">).</span><span class="nx">New</span><span class="p">(</span><span class="nx">len</span><span class="p">(</span><span class="nx">goData</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="nx">js</span><span class="p">.</span><span class="nx">CopyBytesToJS</span><span class="p">(</span><span class="nx">jsData</span><span class="p">,</span> <span class="nx">goData</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>那么，比如js中的<code>Date</code>类型：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="nx">dateConstructor</span> <span class="o">:=</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Global</span><span class="p">().</span><span class="nx">Get</span><span class="p">(</span><span class="s2">&#34;Date&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">dateConstructor</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s2">&#34;2020-10-01&#34;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="极端情况">极端情况</h3>
+<p>好吧，还有最后一个方案，如果遇到极端情况，上述方案都无法解决，那么请转换成字符串吧！让go和js用各自的方法分别处理一波，得到自己想要的结果或者给出各自想给的数据。</p>
+<h2 id="js调用go函数">js调用go函数</h2>
+<blockquote>
+<p>此处需要在go中引入<a class="link" href="https://pkg.go.dev/syscall/js"  target="_blank" rel="noopener"
+    >syscall/js</a>，以实现js相关的操作。</p>
+</blockquote>
+<h3 id="注册go函数">注册go函数</h3>
+<p>将go的函数注册为js的函数，由js来进行调用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;syscall/js&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">handleCount</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">count</span> <span class="o">:=</span> <span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">Int</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">js</span><span class="p">.</span><span class="nf">ValueOf</span><span class="p">(</span><span class="nx">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;HandleEvent&#34;</span><span class="p">,</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="nx">handleEvent</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="o">&lt;-</span><span class="nx">done</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>js.Func()</code> 接受一个函数类型作为其参数，该函数的定义是固定的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="p">(</span><span class="nx">this</span> <span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// this 即 JavaScript 中的 this
+</span></span></span><span class="line"><span class="cl"><span class="c1">// args 是在 JavaScript 中调用该函数的参数列表。
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 返回值需用 js.ValueOf 映射成 JavaScript 的值
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>js.ValueOf返回作为js的值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">| Go                     | JavaScript             |
+</span></span><span class="line"><span class="cl">| ---------------------- | ---------------------- |
+</span></span><span class="line"><span class="cl">| js.Value               | [its value]            |
+</span></span><span class="line"><span class="cl">| js.Func                | function               |
+</span></span><span class="line"><span class="cl">| nil                    | null                   |
+</span></span><span class="line"><span class="cl">| bool                   | boolean                |
+</span></span><span class="line"><span class="cl">| integers and floats    | number                 |
+</span></span><span class="line"><span class="cl">| string                 | string                 |
+</span></span><span class="line"><span class="cl">| []interface{}          | new array              |
+</span></span><span class="line"><span class="cl">| map[string]interface{} | new object             |
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="js调用">js调用</h3>
+<p>在js中使用也非常简单，引入wasm文件之后，直接调用函数即可。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;static/wasm_exec.js&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">go</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Go</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">WebAssembly</span><span class="p">.</span><span class="nx">instantiateStreaming</span><span class="p">(</span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&#34;static/main.wasm&#34;</span><span class="p">),</span> <span class="nx">go</span><span class="p">.</span><span class="nx">importObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">go</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">instance</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">	<span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;#button&#39;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  	<span class="nx">HandleEvent</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// 传入参数1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="go调用js函数">go调用js函数</h2>
+<p>如果在js中本身已经定义了函数，那么在go中也可以直接调用该函数，进行运算，将得出的结果在go中继续使用。</p>
+<h3 id="定义js函数">定义js函数</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">function</span> <span class="nx">add</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">m</span> <span class="o">+</span> <span class="nx">n</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="go中调用js函数">go中调用js函数</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;syscall/js&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;add&#34;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="c1">// 此处输出类型为js.Value，无法直接使用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nf">Int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">// 使用.Int()将其转换为go中的类型，即可直接使用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="引入wasm">引入wasm</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">function</span> <span class="nx">add</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">m</span> <span class="o">+</span> <span class="nx">n</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;static/wasm_exec.js&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">go</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Go</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">WebAssembly</span><span class="p">.</span><span class="nx">instantiateStreaming</span><span class="p">(</span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&#34;static/main.wasm&#34;</span><span class="p">),</span> <span class="nx">go</span><span class="p">.</span><span class="nx">importObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">go</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">instance</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="结果">结果</h3>
+<p>在前端调试台可以看到输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;number: 3&gt;
+</span></span><span class="line"><span class="cl">4
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>第一个结果就是js.Value的值，第二个结果则是转换成go的值，并按照逻辑进行了<code>+1</code>处理。</p>
+<h2 id="回调函数解决go函数阻塞问题">回调函数/解决go函数阻塞问题</h2>
+<blockquote>
+<p>The Go function fn is called with the value of JavaScript&rsquo;s &ldquo;this&rdquo; keyword and the arguments of the invocation. The return value of the invocation is the result of the Go function mapped back to JavaScript according to ValueOf.</p>
+<p>Invoking the wrapped Go function from JavaScript will pause the event loop and spawn a new goroutine. Other wrapped functions which are triggered during a call from Go to JavaScript get executed on the same goroutine.</p>
+<p>As a consequence, if one wrapped function blocks, JavaScript&rsquo;s event loop is blocked until that function returns. Hence, calling any async JavaScript API, which requires the event loop, like fetch (http.Client), will cause an immediate deadlock. Therefore a blocking function should explicitly start a new goroutine.</p>
+</blockquote>
+<p><code>syscall/js</code>官方文档表明，如果go包装函数阻塞，那么js的事件循环也将被阻塞，直到函数返回，调用任何需要事件循环（如fetch）的异步js api都导致立即死锁。因此，一个阻塞函数应该显式地启动一个新的协程。</p>
+<p>此处，可以在go中注册一个回调函数，加上协程实现异步，不会产生堵塞。</p>
+<h3 id="注册函数">注册函数</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;syscall/js&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">handleRender</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">username</span> <span class="o">:=</span> <span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">String</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">callback</span> <span class="o">:=</span> <span class="nx">args</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">callback</span><span class="p">.</span><span class="nf">Invoke</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;hello, %s !&#34;</span><span class="p">,</span> <span class="nx">username</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;waiting...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;HandleRender&#34;</span><span class="p">,</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="nx">handleRender</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="o">&lt;-</span><span class="nx">done</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="js调用-1">js调用</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;static/wasm_exec.js&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">go</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Go</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">WebAssembly</span><span class="p">.</span><span class="nx">instantiateStreaming</span><span class="p">(</span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&#34;static/main.wasm&#34;</span><span class="p">),</span> <span class="nx">go</span><span class="p">.</span><span class="nx">importObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">go</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">instance</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;#button&#39;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">HandleRender</span><span class="p">(</span><span class="s2">&#34;tom&#34;</span><span class="p">,</span> <span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;message: &#39;</span><span class="p">,</span> <span class="nx">message</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="输出">输出</h3>
+<p>在浏览器调试台，可以看到：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">waiting... // 先输出了waiting...
+</span></span><span class="line"><span class="cl">hello, tom ! // 隔了3秒之后，输出了回调函数的值
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="go实现promise">Go实现Promise</h2>
+<p>上一步的回调函数，解决了函数阻塞问题，此处，结合回调函数实现promise，来丰富异步场景。</p>
+<p>在js中，promise是这样的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">setTimeout</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">resolve</span><span class="p">(</span><span class="s2">&#34;hello, world !&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span> <span class="mi">3000</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">})</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用<code>async</code>和<code>await</code>调用，拿到结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">async</span> <span class="kd">function</span> <span class="nx">printMessage</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">setTimeout</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">resolve</span><span class="p">(</span><span class="s2">&#34;hello, world !&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">},</span> <span class="mi">3000</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">message</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在go中又如何构建promise呢？这里可以用到上述go与js的类型转换，创建一个promise：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;Promise&#34;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="注册函数-1">注册函数</h3>
+<p>go的完整实现如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;syscall/js&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;time&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">document</span> <span class="p">=</span> <span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;document&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">handleRender</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">handler</span> <span class="o">:=</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="nx">resolve</span> <span class="o">:=</span> <span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">resolve</span><span class="p">.</span><span class="nf">Invoke</span><span class="p">(</span><span class="s">&#34;hello, world !&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;waiting...&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl">	<span class="p">})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">promiseConstructor</span> <span class="o">:=</span> <span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;Promise&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">promiseConstructor</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="nx">handler</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;HandleRender&#34;</span><span class="p">,</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="nx">handleRender</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="o">&lt;-</span><span class="nx">done</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="js调用-2">js调用</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;static/wasm_exec.js&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">go</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Go</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">WebAssembly</span><span class="p">.</span><span class="nx">instantiateStreaming</span><span class="p">(</span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&#34;static/main.wasm&#34;</span><span class="p">),</span> <span class="nx">go</span><span class="p">.</span><span class="nx">importObject</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">result</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="nx">go</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">instance</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;#button&#39;</span><span class="p">).</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">HandleRender</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;message: &#39;</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="输出-1">输出</h3>
+<p>在浏览器调试台，可以看到：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">waiting... // 先输出了waiting...
+</span></span><span class="line"><span class="cl">message:  hello, world ! // 隔了3秒之后输出
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="操作dom">操作DOM</h2>
+<h3 id="使用document">使用document</h3>
+<p>定义一个全局的document</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">var docuemnt = js.Global().Get(&#34;document&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="获取元素">获取元素</h3>
+<p>获取一个<code>id</code>为<code>container</code>的<code>div</code>，设置<code>background-color: red</code>、<code>widht: 600</code>、<code>height: 400</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">containerElement</span> <span class="p">=</span> <span class="nx">document</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;getElementById&#34;</span><span class="p">,</span> <span class="s">&#34;container&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">containerElementStyle</span> <span class="p">=</span> <span class="nx">container</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;style&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">containerElementStyle</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;background&#34;</span><span class="p">,</span> <span class="s">&#34;red&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">containerElementStyle</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;width&#34;</span><span class="p">,</span> <span class="s">&#34;600px&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">containerElementStyle</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;height&#34;</span><span class="p">,</span> <span class="s">&#34;400px&#34;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="创建元素">创建元素</h3>
+<p>创建一个<code>id</code>为<code>image</code>的<code>image</code>，设置<code>width:300</code>、<code>height:200</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">imageElement</span> <span class="p">=</span> <span class="nx">document</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;createElement&#34;</span><span class="p">,</span> <span class="s">&#34;canvas&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">imageElement</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;width&#34;</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nx">imageElement</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;width&#34;</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="添加子元素">添加子元素</h3>
+<p>将<code>image</code>添加为<code>id</code>为<code>container</code>的<code>div</code>的子元素</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">containerElement</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;appendChild&#34;</span><span class="p">,</span> <span class="nx">imageElement</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="添加事件">添加事件</h3>
+<p>给<code>image</code>添加右击事件，右击<code>image</code>则阻止右键菜单</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 定义响应函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">handlePreventEventCallBack</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;preventDefault&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 给image添加事件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">imageElement</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;addEventListener&#34;</span><span class="p">,</span> <span class="s">&#34;contextmenu&#34;</span><span class="p">,</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="nx">handlePreventEventCallBack</span><span class="p">))</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里需要注意的是，当不再调用响应事件函数时，必须调用Func.Release以释放资源：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">cb</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Func</span>
+</span></span><span class="line"><span class="cl"><span class="nx">cb</span> <span class="p">=</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="nx">any</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;button clicked&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">cb</span><span class="p">.</span><span class="nf">Release</span><span class="p">()</span> <span class="c1">// 如果不再单击该按钮，则释放该函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;document&#34;</span><span class="p">).</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;getElementById&#34;</span><span class="p">,</span> <span class="s">&#34;myButton&#34;</span><span class="p">).</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;addEventListener&#34;</span><span class="p">,</span> <span class="s">&#34;click&#34;</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="canvas">Canvas</h2>
+<p>这里放一波canvas的案例，包含了一些常用方法，可以参考完成更多操作。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;math&#34;</span>
+</span></span><span class="line"><span class="cl">	<span class="s">&#34;syscall/js&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">width</span>  <span class="p">=</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">height</span> <span class="p">=</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">radius</span> <span class="p">=</span> <span class="mi">200</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">document</span> <span class="p">=</span> <span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;document&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">handleRender</span><span class="p">(</span><span class="nx">this</span> <span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">,</span> <span class="nx">args</span> <span class="p">[]</span><span class="nx">js</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">canvas</span> <span class="p">=</span> <span class="nx">document</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;getElementById&#34;</span><span class="p">,</span> <span class="s">&#34;canvas&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">canvas</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;width&#34;</span><span class="p">,</span> <span class="nx">width</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">canvas</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;height&#34;</span><span class="p">,</span> <span class="nx">height</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">ctx</span> <span class="p">=</span> <span class="nx">canvas</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;getContext&#34;</span><span class="p">,</span> <span class="s">&#34;2d&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;beginPath&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;arc&#34;</span><span class="p">,</span> <span class="nx">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nx">height</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nx">radius</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="nx">math</span><span class="p">.</span><span class="nx">Pi</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;fillStyle&#34;</span><span class="p">,</span> <span class="s">&#34;lightpink&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;fill&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;lineWidth&#34;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;strokeStyle&#34;</span><span class="p">,</span> <span class="s">&#34;red&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;stroke&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;font&#34;</span><span class="p">,</span> <span class="s">&#34;20px Comic Sans MS&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;fillStyle&#34;</span><span class="p">,</span> <span class="s">&#34;blue&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span><span class="p">.</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;fillText&#34;</span><span class="p">,</span> <span class="s">&#34;Hello, World !&#34;</span><span class="p">,</span> <span class="nx">width</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">60</span><span class="p">,</span> <span class="nx">height</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">js</span><span class="p">.</span><span class="nf">Global</span><span class="p">().</span><span class="nf">Set</span><span class="p">(</span><span class="s">&#34;HandleRender&#34;</span><span class="p">,</span> <span class="nx">js</span><span class="p">.</span><span class="nf">FuncOf</span><span class="p">(</span><span class="nx">handleRender</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="o">&lt;-</span><span class="nx">done</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>渲染结果：</p>
+<p><img src="https://user-images.githubusercontent.com/25321169/217725808-5dd94da2-bb43-4129-95a9-27f3f85daba5.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="go_wasm_canvas"
+	
+	
+></p>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a class="link" href="https://pkg.go.dev/syscall/js"  target="_blank" rel="noopener"
+    >syscall/js</a></li>
+<li><a class="link" href="https://github.com/golang/go/wiki/WebAssembly"  target="_blank" rel="noopener"
+    >go wiki WebAssembly</a></li>
+<li><a class="link" href="https://geektutu.com/post/quick-go-wasm.html"  target="_blank" rel="noopener"
+    >Go WebAssembly (Wasm) 简明教程</a></li>
+<li><a class="link" href="https://withblue.ink/2020/10/03/go-webassembly-http-requests-and-promises.html"  target="_blank" rel="noopener"
+    >Go, WebAssembly, HTTP requests and Promises</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/webassembly/">WebAssembly</a>
+        
+            <a href="/tags/golang/">Golang</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

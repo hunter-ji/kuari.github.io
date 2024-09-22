@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~'>
+<title>使用Rust和WebAssembly整花活儿(三)——Rust与JS交互</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='使用Rust和WebAssembly整花活儿(三)——Rust与JS交互'>
+<meta property='og:description' content='WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~'>
+<meta property='og:url' content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Javascript' /><meta property='article:tag' content='WebAssembly' /><meta property='article:tag' content='Rust' /><meta property='article:published_time' content='2023-06-27T00:11:12&#43;00:00'/><meta property='article:modified_time' content='2023-06-27T00:11:12&#43;00:00'/><meta property='og:image' content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover.jpg' />
+<meta name="twitter:title" content="使用Rust和WebAssembly整花活儿(三)——Rust与JS交互">
+<meta name="twitter:description" content="WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover.jpg' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#函数的相互调用">函数的相互调用</a>
+      <ol>
+        <li><a href="#js调用rust函数">JS调用Rust函数</a></li>
+        <li><a href="#rust调用js函数">Rust调用JS函数</a></li>
+      </ol>
+    </li>
+    <li><a href="#js调用rust的struct">JS调用Rust的struct</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_800x0_resize_q75_box.jpg"
+                        srcset="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_800x0_resize_q75_box.jpg 800w, /p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_1600x0_resize_q75_box.jpg 1600w"
+                        width="800" 
+                        height="526" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(三)——Rust与JS交互" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/">使用Rust和WebAssembly整花活儿(三)——Rust与JS交互</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 27, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>在上一篇文章<a class="link" href="https://github.com/Kuari/Blog/issues/73"  target="_blank" rel="noopener"
+    >《使用Rust和WebAssembly整花活儿(二)——DOM和类型转换》</a>中，描述了使用Rust操作DOM，并实现Rust与JS类型转换的多种方法。</p>
+<p>在开发 Web 应用程序时，使用 Rust 编写的 Wasm 模块可以提供更高的性能和更好的安全性。但是，为了与现有的 JavaScript 代码集成，必须实现 Rust 与 JS 之间的交互。Rust 与 JS 交互的主要目的是将两种语言的优势结合起来，以实现更好的 Web 应用程序。</p>
+<p>基于上一篇文章中，Rust与JS的类型转换的多种方法，本篇文章继续深入Rust与JS的交互。</p>
+<p>首先，Rust与JS的类型转换，可以实现变量的传递，那么变量是要用在哪里呢？那必然是函数了！</p>
+<p>所以，本篇文章来讲述一下Rust与JS的函数相互调用，基于此，可以实现大量日常功能开发。</p>
+<p>并且，还将会讲述一下，如何导出Rust的struct给JS调用。</p>
+<p>是的，没错，在JS调用Rust的struct！一开始看到这个功能的时候，我的脑子是有点炸裂的&hellip;&hellip;😳</p>
+<p>本篇文章中，将基于上一篇文章中创建的项目来继续开发。</p>
+<p>源码：<a class="link" href="https://github.com/Kuari/hello-wasm"  target="_blank" rel="noopener"
+    >github.com/Kuari/hello-wasm</a></p>
+<h2 id="环境">环境</h2>
+<ul>
+<li>Rust 1.70.0</li>
+<li>wasm-bindgen 0.2.87</li>
+</ul>
+<h2 id="函数的相互调用">函数的相互调用</h2>
+<h3 id="js调用rust函数">JS调用Rust函数</h3>
+<p>其实，在本系列文章的第一篇中，就是使用的JS调用Rust函数作为案例来演示的，这里依然以此为例，主要讲一下要点。</p>
+<p>首先，声明一个Rust函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">use</span><span class="w"> </span><span class="n">wasm_bindgen</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>此处需要注意的要点如下：</p>
+<ul>
+<li>引入<code>wasm_bindgen</code></li>
+<li>声明一个函数，使用<code>pub</code>声明</li>
+<li>在函数上使用<code>#[wasm_bindgen]</code>宏来将Rust函数导出为WebAssembly模块的函数</li>
+</ul>
+<p>接着，编译成wasm文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">wasm-pack build --target web
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后，在JS中调用该函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">add</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`the result from rust is: </span><span class="si">${</span><span class="nx">result</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后，启动http server，在浏览器的控制台中可以看到<code>the result from rust is: 3</code>，表明调用成功！</p>
+<h3 id="rust调用js函数">Rust调用JS函数</h3>
+<p>###1 指定JS对象</p>
+<p>在Rust中调用JS函数，需要进行指定JS对象，也就是说，得明确告诉Rust，这个JS函数是从JS哪儿拿来的用的。</p>
+<p>主要在于下面两个方式：</p>
+<ul>
+<li><em><strong>js_namespace</strong></em>: 是一个可选的属性，用于指定一个JavaScript命名空间，其中包含将要在wasm模块中导出的函数。如果没有指定<code>js_namespace</code>，则所有的导出函数将被放置在全局命名空间下。</li>
+<li><em><strong>js_name</strong></em>: 是另一个可选属性，它用于指定JavaScript中的函数名称。如果没有指定<code>js_name</code>，则导出函数的名称将与Rust中的函数名称相同。</li>
+</ul>
+<p>###2 JS原生函数</p>
+<p>对于一些JS原生函数，在Rust中，需要去寻找替代方案，比如我们上一篇文章中讲的<code>console.log()</code>函数，是不是觉得好麻烦啊！</p>
+<p>那么，你想直接在Rust中调用JS原生函数吗？！</p>
+<p>此处，就以<code>console.log()</code>函数为例，直接在Rust中引入并调用，免去替代方案的烦恼。</p>
+<p>首先，给出Rust代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;C&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">#[wasm_bindgen(js_namespace = console)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">fn</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_js_func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">log</span><span class="p">(</span><span class="s">&#34;hello, javascript!&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>如上代码中，<code>call_js_func</code>函数，顾名思义，此处是调用了js函数，并传入参数<code>hello, javascript!</code>。</p>
+<p>那么，<code>call_js_func</code>函数上方的代码，我们来一步步解析一下：</p>
+<ol>
+<li>第一行代码<code>#[wasm_bindgen]</code>是Rust的属性，它告诉编译器将函数导出为WebAssembly模块</li>
+<li><code>extern &quot;C&quot;</code>是C语言调用约定，它告诉Rust编译器将函数导出为C语言函数</li>
+<li><code>#[wasm_bindgen(js_namespace = console)]</code>告诉编译器将函数绑定到JavaScript中的console对象</li>
+<li><code>fn log(message: &amp;str)</code>是一个Rust函数，它接受一个字符串参数，并将其打印到JavaScript中的console对象中</li>
+</ol>
+<p>此处与JS交互的关键是<code>js_namespace</code>。在Rust中，<code>js_namespace</code>是用于指定JavaScript命名空间的属性。在WebAssembly中，我们可以通过它将函数绑定到JavaScript中的对象上。</p>
+<p>在上述代码中，<code>#[wasm_bindgen(js_namespace = console)]</code>告诉编译器将函数绑定到JavaScript中的<code>console</code>对象。这意味着在JS中使用<code>console.log()</code>函数来调用Rust中的<code>log()</code>函数。</p>
+<p>因此，类似的原生函数，都可以使用该方法来实现调用。</p>
+<p>最后，我们在JS中调用下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">call_js_func</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">call_js_func</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以在浏览器的控制台中看到<code>hello, javascript!</code>。妙啊！</p>
+<p>其实对于<code>console.log()</code>而言，还有另一种调用方式，那就是使用<code>js_namespace</code>和<code>js_name</code>同时指定。</p>
+<p>或许，你会问，这有什么不同吗？是的，这有些不同。</p>
+<p>不知道你是否发现，当前这个案例中，指定了<code>js_namespace</code>为<code>console</code>，但是真实执行的函数是<code>log()</code>，那么这个<code>log</code>函数的指定，其实是体现在Rust中同样的函数名<code>log</code>。也就是说，该案例的<code>log()</code>就是<code>console.log()</code>中的<code>log()</code>。</p>
+<p>我们来换个名字看看，将原来的<code>log()</code>换成<code>log2()</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;C&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">#[wasm_bindgen(js_namespace = console)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">fn</span> <span class="nf">log2</span><span class="p">(</span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_js_func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">log2</span><span class="p">(</span><span class="s">&#34;hello, javascript!&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后编译后去控制台看看，就会看到报错：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">TypeError: console.log2 is not a function
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>因此，当我们使用<code>js_namespace</code>和<code>js_name</code>结合的方式，在此处是可以进行自定义函数名的。</p>
+<p>看一下Rust代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;C&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">#[wasm_bindgen(js_namespace = console)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">fn</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">#[wasm_bindgen(js_namespace = console, js_name = log)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">fn</span> <span class="nf">log_str</span><span class="p">(</span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_js_func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">log_str</span><span class="p">(</span><span class="s">&#34;hello, javascript!&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>此处，重新定义了一个函数<code>log_str</code>，但是其指定了<code>js_namespace = console</code>和<code>js_name = log</code>，那么此处，就可以使用自定义的函数名。</p>
+<p>直接编译后，在控制台看一下，可以直接看到正常输出：<code>hello, javascript!</code>。</p>
+<p>总结一下，如果没有指定<code>js_name</code>，则 Rust 函数名称将用作 JS 函数名称。</p>
+<p>###3 自定义JS函数</p>
+<p>在一定场景下，需要使用Rust调用JS函数，比如对于一些对于JS而言更有优势的场景——用JS操作DOM，用Rust计算。</p>
+<p>首先，创建一个文件<code>index.js</code>，写入一个函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">export</span> <span class="kd">function</span> <span class="nx">addIt</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">m</span> <span class="o">+</span> <span class="nx">n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当前的文件结构关系如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">.
+</span></span><span class="line"><span class="cl">├── Cargo.lock
+</span></span><span class="line"><span class="cl">├── Cargo.toml
+</span></span><span class="line"><span class="cl">├── README.md
+</span></span><span class="line"><span class="cl">├── index.html
+</span></span><span class="line"><span class="cl">├── index.js
+</span></span><span class="line"><span class="cl">├── pkg
+</span></span><span class="line"><span class="cl">│   ├── README.md
+</span></span><span class="line"><span class="cl">│   ├── hello_wasm.d.ts
+</span></span><span class="line"><span class="cl">│   ├── hello_wasm.js
+</span></span><span class="line"><span class="cl">│   ├── hello_wasm_bg.wasm
+</span></span><span class="line"><span class="cl">│   ├── hello_wasm_bg.wasm.d.ts
+</span></span><span class="line"><span class="cl">│   └── package.json
+</span></span><span class="line"><span class="cl">├── src
+</span></span><span class="line"><span class="cl">│   └── lib.rs
+</span></span><span class="line"><span class="cl">└── target
+</span></span><span class="line"><span class="cl">    ├── CACHEDIR.TAG
+</span></span><span class="line"><span class="cl">    ├── debug
+</span></span><span class="line"><span class="cl">    ├── release
+</span></span><span class="line"><span class="cl">    └── wasm32-unknown-unknown
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中，<code>index.js</code>和<code>lib.rs</code>，以及<code>hello_wasm_bg.wasm</code>都是不在同一级别的，<code>index.js</code>都在其它两个文件的上一级。记住这个机构关系！</p>
+<p>然后，在<code>lib.rs</code>中，指定函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl">##<span class="p">.</span><span class="o">/</span><span class="n">index</span><span class="p">.</span><span class="n">js</span><span class="s">&#34;)]
+</span></span></span><span class="line"><span class="cl"><span class="s">extern &#34;</span><span class="n">C</span><span class="s">&#34; {
+</span></span></span><span class="line"><span class="cl"><span class="s">    fn addIt(m: i32, n: i32) -&gt; i32;
+</span></span></span><span class="line"><span class="cl"><span class="s">}
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>其中，<code>raw_module = &quot;../index.js&quot;</code>的意思是，指定对应的<code>index.js</code>文件，大家应该清楚，此处指定的是刚刚创建的<code>index.js</code>。<code>raw_module</code>的作用就是用来指定js文件的。</p>
+<p>这段代码在前端，可以等同于：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">addIt</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../index.js&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样在前端都不用引入了，直接在Rust中引入了，感觉还有点奇妙的。</p>
+<p>接着，在Rust调用该函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">call_js_func</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">addIt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后，在前端调用，编译后，在浏览器的控制台中可以看到输出结果了！</p>
+<p>总结一下，这里有几个注意点：</p>
+<ol>
+<li>JS的函数必须要export，否则将无法调用；</li>
+<li><code>raw_module</code>只能用来指定相对路径，并且，大家可以在浏览器的控制台中注意到，此处的<code>../</code>的相对路径，其实是以wasm文件而言的相对路径，这里一定要注意呀！</li>
+</ol>
+<h2 id="js调用rust的struct">JS调用Rust的struct</h2>
+<p>现在，来点炸裂的，JS调用Rust的struct？！</p>
+<p>JS中连struct都没有，这玩意儿导出来会是什么样，得怎么在JS中调用呢？！</p>
+<p>首先，定义一个struct，并且声明几个方法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">User</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">age</span>: <span class="kt">u32</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">#[wasm_bindgen(constructor)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">name</span>: <span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">age</span>: <span class="kt">u32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">User</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">User</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">print_user</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;name is : </span><span class="si">{}</span><span class="s">, age is : </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">age</span><span class="p">).</span><span class="n">as_str</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">set_age</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">age</span>: <span class="kt">u32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">age</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>此处，声明了一个struct名为<code>User</code>，包含<code>name</code>和<code>age</code>两个字段，并声明了<code>new</code>、<code>print_user</code>和<code>set_age</code>方法。</p>
+<p>其中还有一个未见过的<code>#[wasm_bindgen(constructor)]</code>，<code>constructor</code>用于指示被绑定的函数实际上应该转换为调用 JavaScript 中的 new 运算符。或许你还不太清晰，继续看下去，你就会明白了。</p>
+<p>接着，在JS中调用这个struct，和其方法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">function</span> <span class="nx">addIt2</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">m</span> <span class="o">+</span> <span class="nx">n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">User</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">user</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">User</span><span class="p">(</span><span class="s1">&#39;kuari&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">user</span><span class="p">.</span><span class="nx">set_age</span><span class="p">(</span><span class="mi">21</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">user</span><span class="p">.</span><span class="nx">print_user</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到，这里的用法就很熟悉了！</p>
+<p>大概想一下，在Rust中要如何调用？也就是直接new一个——<code>User::new('kuari', 20)</code>。</p>
+<p>此处在JS中，也是如此，先new一个！</p>
+<p>然后很自然地调用struct的方法。</p>
+<p>编译后，打开浏览器，可以在控制台看到输出：<code>name is : kuari, age is : 21</code>。</p>
+<p>其实，或许大家会很好奇，起码我是非常好奇的，Rust的struct在JS中到底是一个怎样的存在呢？</p>
+<p>这里直接添加一个<code>console.log(user)</code>，就可以在输出看到。那么到底在JS中是一个怎样的存在呢？请各位动手打印一下看看吧！:P</p>
+<h2 id="总结">总结</h2>
+<p>本篇文章中，主要讲述了Rust与JS的交互，体现在Rust与JS的相互调用，这是建立在<a class="link" href="https://github.com/Kuari/Blog/issues/73"  target="_blank" rel="noopener"
+    >上一篇文章</a>中类型转换的基础上的。</p>
+<p>Rust与JS的函数相互调用的学习成本还是较大的，而且对比Go写wasm，Rust的颗粒度是非常细的，几乎可以说是随心所欲了。</p>
+<p>比较炸裂的就是Rust的struct导出给JS用，这对于Rust与JS的交互而言，还是非常棒的体验。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/javascript/">Javascript</a>
+        
+            <a href="/tags/webassembly/">WebAssembly</a>
+        
+            <a href="/tags/rust/">Rust</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(二)——DOM和类型转换"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(二)——DOM和类型转换</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%80%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%80%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(一)——快速开始"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(一)——快速开始</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='前言 基于架构的调整，前端开始转为微前端。经过调研，决定使用qiankun微服务框架来使用，本文将介绍VUE3&#43;TS&#43;qiankun的实践经过。微服务架构的优势之一在于可以结合不同技术栈的节点，基于技术栈的考虑，此处用的都是vue3。
+源码：https://github.com/Kuari/Blog/tree/master/Examples/microFrontend
+环境 vue 3.0.0 TypeScript 4.1.5 vue router 4.0.0 @vue/cli 4.5.15 qiankun 2.6.3 实践 架构 如上图所示，微服务架构将会由多个节点构成，首先由一个主节点site_base连接所有子节点，子节点可以不断拓展。
+主节点 主节点源码可见于https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base
+创建主节点，选择vue3&#43;ts
+1 2 vue create site_base cd site_base 安装qiankun
+1 yarn add qiankun 在src/App.vue中添加路由和渲染节点
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 &amp;lt;template&amp;gt; &amp;lt;div id=&amp;#34;nav&amp;#34;&amp;gt; &amp;lt;router-link to=&amp;#34;/&amp;#34;&amp;gt;Home&amp;lt;/router-link&amp;gt; | &amp;lt;router-link to=&amp;#34;/about&amp;#34;&amp;gt;About&amp;lt;/router-link&amp;gt; | &amp;lt;!-- 新增site1路由 --&amp;gt; &amp;lt;router-link to=&amp;#34;/site1&amp;#34;&amp;gt;Site1&amp;lt;/router-link&amp;gt; | &amp;lt;!-- 新增site2路由 --&amp;gt; &amp;lt;router-link to=&amp;#34;/site2&amp;#34;&amp;gt;Site2&amp;lt;/router-link&amp;gt; &amp;lt;/div&amp;gt; &amp;lt;router-view/&amp;gt; &amp;lt;!'>
+<title>VUE3&#43;TS&#43;微前端实践</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/vue3-ts-%E5%BE%AE%E5%89%8D%E7%AB%AF%E5%AE%9E%E8%B7%B5/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='VUE3&#43;TS&#43;微前端实践'>
+<meta property='og:description' content='前言 基于架构的调整，前端开始转为微前端。经过调研，决定使用qiankun微服务框架来使用，本文将介绍VUE3&#43;TS&#43;qiankun的实践经过。微服务架构的优势之一在于可以结合不同技术栈的节点，基于技术栈的考虑，此处用的都是vue3。
+源码：https://github.com/Kuari/Blog/tree/master/Examples/microFrontend
+环境 vue 3.0.0 TypeScript 4.1.5 vue router 4.0.0 @vue/cli 4.5.15 qiankun 2.6.3 实践 架构 如上图所示，微服务架构将会由多个节点构成，首先由一个主节点site_base连接所有子节点，子节点可以不断拓展。
+主节点 主节点源码可见于https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base
+创建主节点，选择vue3&#43;ts
+1 2 vue create site_base cd site_base 安装qiankun
+1 yarn add qiankun 在src/App.vue中添加路由和渲染节点
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 &amp;lt;template&amp;gt; &amp;lt;div id=&amp;#34;nav&amp;#34;&amp;gt; &amp;lt;router-link to=&amp;#34;/&amp;#34;&amp;gt;Home&amp;lt;/router-link&amp;gt; | &amp;lt;router-link to=&amp;#34;/about&amp;#34;&amp;gt;About&amp;lt;/router-link&amp;gt; | &amp;lt;!-- 新增site1路由 --&amp;gt; &amp;lt;router-link to=&amp;#34;/site1&amp;#34;&amp;gt;Site1&amp;lt;/router-link&amp;gt; | &amp;lt;!-- 新增site2路由 --&amp;gt; &amp;lt;router-link to=&amp;#34;/site2&amp;#34;&amp;gt;Site2&amp;lt;/router-link&amp;gt; &amp;lt;/div&amp;gt; &amp;lt;router-view/&amp;gt; &amp;lt;!'>
+<meta property='og:url' content='https://blog.hunterji.com/p/vue3-ts-%E5%BE%AE%E5%89%8D%E7%AB%AF%E5%AE%9E%E8%B7%B5/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Vue' /><meta property='article:tag' content='TypeScript' /><meta property='article:published_time' content='2022-02-16T15:07:56&#43;00:00'/><meta property='article:modified_time' content='2022-02-16T15:07:56&#43;00:00'/>
+<meta name="twitter:title" content="VUE3&#43;TS&#43;微前端实践">
+<meta name="twitter:description" content="前言 基于架构的调整，前端开始转为微前端。经过调研，决定使用qiankun微服务框架来使用，本文将介绍VUE3&#43;TS&#43;qiankun的实践经过。微服务架构的优势之一在于可以结合不同技术栈的节点，基于技术栈的考虑，此处用的都是vue3。
+源码：https://github.com/Kuari/Blog/tree/master/Examples/microFrontend
+环境 vue 3.0.0 TypeScript 4.1.5 vue router 4.0.0 @vue/cli 4.5.15 qiankun 2.6.3 实践 架构 如上图所示，微服务架构将会由多个节点构成，首先由一个主节点site_base连接所有子节点，子节点可以不断拓展。
+主节点 主节点源码可见于https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base
+创建主节点，选择vue3&#43;ts
+1 2 vue create site_base cd site_base 安装qiankun
+1 yarn add qiankun 在src/App.vue中添加路由和渲染节点
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 &amp;lt;template&amp;gt; &amp;lt;div id=&amp;#34;nav&amp;#34;&amp;gt; &amp;lt;router-link to=&amp;#34;/&amp;#34;&amp;gt;Home&amp;lt;/router-link&amp;gt; | &amp;lt;router-link to=&amp;#34;/about&amp;#34;&amp;gt;About&amp;lt;/router-link&amp;gt; | &amp;lt;!-- 新增site1路由 --&amp;gt; &amp;lt;router-link to=&amp;#34;/site1&amp;#34;&amp;gt;Site1&amp;lt;/router-link&amp;gt; | &amp;lt;!-- 新增site2路由 --&amp;gt; &amp;lt;router-link to=&amp;#34;/site2&amp;#34;&amp;gt;Site2&amp;lt;/router-link&amp;gt; &amp;lt;/div&amp;gt; &amp;lt;router-view/&amp;gt; &amp;lt;!">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#实践">实践</a>
+      <ol>
+        <li><a href="#架构">架构</a></li>
+        <li><a href="#主节点">主节点</a></li>
+        <li><a href="#子节点">子节点</a></li>
+        <li><a href="#验证">验证</a></li>
+      </ol>
+    </li>
+    <li><a href="#主节点优化">主节点优化</a>
+      <ol>
+        <li><a href="#模块化子节点配置">模块化子节点配置</a></li>
+        <li><a href="#过渡效果">过渡效果</a></li>
+      </ol>
+    </li>
+    <li><a href="#结语">结语</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/vue3-ts-%E5%BE%AE%E5%89%8D%E7%AB%AF%E5%AE%9E%E8%B7%B5/">VUE3&#43;TS&#43;微前端实践</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Feb 16, 2022</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>基于架构的调整，前端开始转为微前端。经过调研，决定使用<a class="link" href="https://qiankun.umijs.org/zh/guide/getting-started"  target="_blank" rel="noopener"
+    >qiankun</a>微服务框架来使用，本文将介绍VUE3+TS+qiankun的实践经过。微服务架构的优势之一在于可以结合不同技术栈的节点，基于技术栈的考虑，此处用的都是vue3。</p>
+<p>源码：<a class="link" href="https://github.com/Kuari/Blog/tree/master/Examples/microFrontend"  target="_blank" rel="noopener"
+    >https://github.com/Kuari/Blog/tree/master/Examples/microFrontend</a></p>
+<h2 id="环境">环境</h2>
+<ul>
+<li>vue 3.0.0</li>
+<li>TypeScript 4.1.5</li>
+<li>vue router 4.0.0</li>
+<li>@vue/cli 4.5.15</li>
+<li>qiankun 2.6.3</li>
+</ul>
+<h2 id="实践">实践</h2>
+<h3 id="架构">架构</h3>
+<p><img src="/../assets/qiankun_example.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="qiankun_example"
+	
+	
+></p>
+<p>如上图所示，微服务架构将会由多个节点构成，首先由一个主节点<code>site_base</code>连接所有子节点，子节点可以不断拓展。</p>
+<h3 id="主节点">主节点</h3>
+<p>主节点源码可见于<a class="link" href="https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base"  target="_blank" rel="noopener"
+    >https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base</a></p>
+<p>创建主节点，选择vue3+ts</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">vue create site_base
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> site_base
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>安装<code>qiankun</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">yarn add qiankun
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在<code>src/App.vue</code>中添加路由和渲染节点</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;nav&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">router-link</span> <span class="na">to</span><span class="o">=</span><span class="s">&#34;/&#34;</span><span class="p">&gt;</span>Home<span class="p">&lt;/</span><span class="nt">router-link</span><span class="p">&gt;</span> |
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">router-link</span> <span class="na">to</span><span class="o">=</span><span class="s">&#34;/about&#34;</span><span class="p">&gt;</span>About<span class="p">&lt;/</span><span class="nt">router-link</span><span class="p">&gt;</span> |
+</span></span><span class="line"><span class="cl">    <span class="c">&lt;!-- 新增site1路由 --&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">router-link</span> <span class="na">to</span><span class="o">=</span><span class="s">&#34;/site1&#34;</span><span class="p">&gt;</span>Site1<span class="p">&lt;/</span><span class="nt">router-link</span><span class="p">&gt;</span> |
+</span></span><span class="line"><span class="cl">    <span class="c">&lt;!-- 新增site2路由 --&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">router-link</span> <span class="na">to</span><span class="o">=</span><span class="s">&#34;/site2&#34;</span><span class="p">&gt;</span>Site2<span class="p">&lt;/</span><span class="nt">router-link</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">router-view</span><span class="p">/&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="c">&lt;!-- 新增site1渲染节点 --&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;site1&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="c">&lt;!-- 新增site2渲染节点 --&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;site2&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在<code>src/main.ts</code>中引入子节点配置</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">createApp</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;vue&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">App</span> <span class="kr">from</span> <span class="s1">&#39;./App.vue&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">router</span> <span class="kr">from</span> <span class="s1">&#39;./router&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">store</span> <span class="kr">from</span> <span class="s1">&#39;./store&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">registerMicroApps</span><span class="p">,</span> <span class="nx">start</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;qiankun&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">apps</span>: <span class="kt">any</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;site1&#39;</span><span class="p">,</span> <span class="c1">// 应用的名字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">entry</span><span class="o">:</span> <span class="s1">&#39;http://localhost:9001/&#39;</span><span class="p">,</span> <span class="c1">// 默认加载这个html，解析里面的js动态的执行（子应用必须支持跨域，内部使用的是 fetch）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">container</span><span class="o">:</span> <span class="s1">&#39;#site1&#39;</span><span class="p">,</span> <span class="c1">// 要渲染到的节点id，对应上一步中src/App.vue中的渲染节点
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">activeRule</span><span class="o">:</span> <span class="s1">&#39;/site1&#39;</span> <span class="c1">// 访问子节点路由
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;site2&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">entry</span><span class="o">:</span> <span class="s1">&#39;http://localhost:9002/&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">container</span><span class="o">:</span> <span class="s1">&#39;#site2&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">activeRule</span><span class="o">:</span> <span class="s1">&#39;/site2&#39;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">registerMicroApps</span><span class="p">(</span><span class="nx">apps</span><span class="p">)</span> <span class="c1">// 注册应用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">start</span><span class="p">()</span> <span class="c1">// 开启应用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nx">createApp</span><span class="p">(</span><span class="nx">App</span><span class="p">).</span><span class="nx">use</span><span class="p">(</span><span class="nx">store</span><span class="p">).</span><span class="nx">use</span><span class="p">(</span><span class="nx">router</span><span class="p">).</span><span class="nx">mount</span><span class="p">(</span><span class="s1">&#39;#app&#39;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="子节点">子节点</h3>
+<p>子节点源码可见于<a class="link" href="https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_1"  target="_blank" rel="noopener"
+    >https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_1</a></p>
+<p>此处以<code>site1</code>为例，<code>site2</code>同理。</p>
+<p>创建子节点，选择vue3+ts</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">vue create site_1
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> site_1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑<code>src/App.vue</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">router-view</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑<code>src/views/Home.vue</code>，修改其内容，写一点标识性的文本</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>Hello, Site1!<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>创建文件<code>src/pulic-path.ts</code>，第一行的注视一定要加，避免eslint对于变量的报错</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="cm">/* eslint-disable camelcase */</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">((</span><span class="nb">window</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">__POWERED_BY_QIANKUN__</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">__webpack_public_path__</span> <span class="o">=</span> <span class="p">(</span><span class="nb">window</span> <span class="kr">as</span> <span class="kt">any</span><span class="p">).</span><span class="nx">__INJECTED_PUBLIC_PATH_BY_QIANKUN__</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑<code>src/router/index.ts</code>，此处直接返回<code>routes</code>，而不是<code>router</code>，并且修改</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">RouteRecordRaw</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;vue-router&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">routes</span>: <span class="kt">Array</span><span class="p">&lt;</span><span class="nt">RouteRecordRaw</span><span class="p">&gt;</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">path</span><span class="o">:</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Home&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">component</span><span class="o">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="kr">import</span><span class="p">(</span><span class="s1">&#39;../views/Home.vue&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">path</span><span class="o">:</span> <span class="s1">&#39;/about&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;About&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">component</span><span class="o">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="kr">import</span><span class="p">(</span><span class="s1">&#39;../views/About.vue&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 直接返回routes，由其它地方处理创建路由
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">export</span> <span class="k">default</span> <span class="nx">routes</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑<code>src/main.ts</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="s1">&#39;./public-path&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">createApp</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;vue&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">createRouter</span><span class="p">,</span> <span class="nx">createWebHistory</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;vue-router&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">App</span> <span class="kr">from</span> <span class="s1">&#39;./App.vue&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">routes</span> <span class="kr">from</span> <span class="s1">&#39;./router&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">store</span> <span class="kr">from</span> <span class="s1">&#39;./store&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">let</span> <span class="nx">router</span> <span class="o">=</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl"><span class="kd">let</span> <span class="nx">instance</span>: <span class="kt">any</span> <span class="o">=</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl"><span class="kd">let</span> <span class="nx">history</span>: <span class="kt">any</span> <span class="o">=</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">function</span> <span class="nx">render</span> <span class="p">(</span><span class="nx">props</span> <span class="o">=</span> <span class="p">{})</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="p">{</span> <span class="nx">container</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">props</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 当为微服务主节点情况下访问，会设置二级路径，而直接访问时没有二级路径，此处需要根据实际情况修改
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">history</span> <span class="o">=</span> <span class="nx">createWebHistory</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">__POWERED_BY_QIANKUN__</span> <span class="o">?</span> <span class="s1">&#39;/site1&#39;</span> <span class="o">:</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">router</span> <span class="o">=</span> <span class="nx">createRouter</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">history</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">routes</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span> <span class="o">=</span> <span class="nx">createApp</span><span class="p">(</span><span class="nx">App</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">router</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">store</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">mount</span><span class="p">(</span><span class="nx">container</span> <span class="o">?</span> <span class="nx">container</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">&#39;#app&#39;</span><span class="p">)</span> <span class="o">:</span> <span class="s1">&#39;#app&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">__POWERED_BY_QIANKUN__</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">render</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="kr">const</span> <span class="nx">bootstrap</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span><span class="o">:</span> <span class="nx">Promise</span><span class="p">&lt;</span><span class="nt">void</span><span class="p">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;%c &#39;</span><span class="p">,</span> <span class="s1">&#39;color: green &#39;</span><span class="p">,</span> <span class="s1">&#39;vue3.0 app bootstraped&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">storeTest</span> <span class="o">=</span> <span class="p">(</span><span class="nx">props</span>: <span class="kt">any</span><span class="p">)</span><span class="o">:</span> <span class="k">void</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">props</span><span class="p">.</span><span class="nx">onGlobalStateChange</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">props</span><span class="p">.</span><span class="nx">onGlobalStateChange</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">prev</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`[onGlobalStateChange - </span><span class="si">${</span><span class="nx">props</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">]:`</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">prev</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">  <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">props</span><span class="p">.</span><span class="nx">setGlobalState</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">props</span><span class="p">.</span><span class="nx">setGlobalState</span><span class="p">({</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">ignore</span>: <span class="kt">props.name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">user</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">name</span>: <span class="kt">props.name</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">})</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="kr">const</span> <span class="nx">mount</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">(</span><span class="nx">props</span>: <span class="kt">any</span><span class="p">)</span><span class="o">:</span> <span class="nx">Promise</span><span class="p">&lt;</span><span class="nt">void</span><span class="p">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">storeTest</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">render</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">globalProperties</span><span class="p">.</span><span class="nx">$onGlobalStateChange</span> <span class="o">=</span> <span class="nx">props</span><span class="p">.</span><span class="nx">onGlobalStateChange</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">globalProperties</span><span class="p">.</span><span class="nx">$setGlobalState</span> <span class="o">=</span> <span class="nx">props</span><span class="p">.</span><span class="nx">setGlobalState</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="kr">const</span> <span class="nx">unmount</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span><span class="o">:</span> <span class="nx">Promise</span><span class="p">&lt;</span><span class="nt">void</span><span class="p">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">unmount</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span><span class="p">.</span><span class="nx">_container</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">instance</span> <span class="o">=</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">router</span> <span class="o">=</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">history</span><span class="p">.</span><span class="nx">destroy</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>创建文件<code>vue.config.js</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="p">{</span> <span class="nx">name</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./package&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">function</span> <span class="nx">resolve</span> <span class="p">(</span><span class="nx">dir</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="nx">dir</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">port</span> <span class="o">=</span> <span class="mi">9001</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">outputDir</span><span class="o">:</span> <span class="s1">&#39;dist&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">assetsDir</span><span class="o">:</span> <span class="s1">&#39;static&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">filenameHashing</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nx">devServer</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">hot</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">disableHostCheck</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">port</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">overlay</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">warnings</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">errors</span><span class="o">:</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">headers</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="s1">&#39;Access-Control-Allow-Origin&#39;</span><span class="o">:</span> <span class="s1">&#39;*&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 自定义webpack配置
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">configureWebpack</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">resolve</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">alias</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="s1">&#39;@&#39;</span><span class="o">:</span> <span class="nx">resolve</span><span class="p">(</span><span class="s1">&#39;src&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">output</span><span class="o">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 把子应用打包成 umd 库格式
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="nx">library</span><span class="o">:</span> <span class="sb">`</span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">-[name]`</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">libraryTarget</span><span class="o">:</span> <span class="s1">&#39;umd&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">      <span class="nx">jsonpFunction</span><span class="o">:</span> <span class="sb">`webpackJsonp_</span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">`</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="验证">验证</h3>
+<p>主节点和子节点分别独立运行，但是子节点的地址需要跟主节点配置中子节点对应的地址相同。</p>
+<p>在主节点上点击子节点的路由，即可在主节点上访问子节点的页面了！</p>
+<img src="../assets/qiangkun_example_result.png" alt="qiangkun_example_result" style="zoom:50%;" />
+<h2 id="主节点优化">主节点优化</h2>
+<p>主节点除了如上配置，可以进行两项优化：</p>
+<ul>
+<li>模块化子节点配置</li>
+<li>添加过渡状态，当加载子节点时窗口顶部出现加载进度条</li>
+</ul>
+<p>优化后主节点源码可见于<a class="link" href="https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base_optimize"  target="_blank" rel="noopener"
+    >https://github.com/Kuari/Blog/tree/master/Examples/microFrontend/site_base_optimize</a></p>
+<h3 id="模块化子节点配置">模块化子节点配置</h3>
+<p>创建文件夹<code>src/childNodes</code>，然后创建文件<code>src/childNodes/apps.ts</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">const</span> <span class="nx">apps</span>: <span class="kt">any</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;site1&#39;</span><span class="p">,</span> <span class="c1">// 应用的名字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">entry</span><span class="o">:</span> <span class="s1">&#39;http://localhost:9001/&#39;</span><span class="p">,</span> <span class="c1">// 默认加载这个html，解析里面的js动态的执行（子应用必须支持跨域，内部使用的是 fetch）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">container</span><span class="o">:</span> <span class="s1">&#39;#site1&#39;</span><span class="p">,</span> <span class="c1">// 要渲染到的节点id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">activeRule</span><span class="o">:</span> <span class="s1">&#39;/site1&#39;</span> <span class="c1">// 访问子节点路由
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="k">default</span> <span class="nx">apps</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>创建文件<code>src/childNodes/index.ts</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">registerMicroApps</span><span class="p">,</span> <span class="nx">start</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;qiankun&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">apps</span> <span class="kr">from</span> <span class="s1">&#39;./apps&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">registerMicroApps</span><span class="p">(</span><span class="nx">apps</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="k">default</span> <span class="nx">start</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑<code>src/main.ts</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">createApp</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;vue&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">App</span> <span class="kr">from</span> <span class="s1">&#39;./App.vue&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">router</span> <span class="kr">from</span> <span class="s1">&#39;./router&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">store</span> <span class="kr">from</span> <span class="s1">&#39;./store&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">start</span> <span class="kr">from</span> <span class="s1">&#39;./childNodes&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">start</span><span class="p">()</span> <span class="c1">// 开启应用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nx">createApp</span><span class="p">(</span><span class="nx">App</span><span class="p">).</span><span class="nx">use</span><span class="p">(</span><span class="nx">store</span><span class="p">).</span><span class="nx">use</span><span class="p">(</span><span class="nx">router</span><span class="p">).</span><span class="nx">mount</span><span class="p">(</span><span class="s1">&#39;#app&#39;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="过渡效果">过渡效果</h3>
+<p>此处的过渡效果采用<code>NProgress</code>库，先来安装一波</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">yarn add nprogress
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编辑<code>src/childNodes/index.ts</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-typescript" data-lang="typescript"><span class="line"><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">addGlobalUncaughtErrorHandler</span><span class="p">,</span> <span class="nx">registerMicroApps</span><span class="p">,</span> <span class="nx">start</span> <span class="p">}</span> <span class="kr">from</span> <span class="s1">&#39;qiankun&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">apps</span> <span class="kr">from</span> <span class="s1">&#39;./apps&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="nx">NProgress</span> <span class="kr">from</span> <span class="s1">&#39;nprogress&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="kr">import</span> <span class="s1">&#39;nprogress/nprogress.css&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">registerMicroApps</span><span class="p">(</span><span class="nx">apps</span><span class="p">,</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// qiankun 生命周期钩子 - 子节点加载前
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">beforeLoad</span><span class="o">:</span> <span class="p">(</span><span class="nx">app</span>: <span class="kt">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">NProgress</span><span class="p">.</span><span class="nx">start</span><span class="p">()</span> <span class="c1">// 开始进度条
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="nx">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// qiankun 生命周期钩子 - 子节点挂载后
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nx">afterMount</span><span class="o">:</span> <span class="p">(</span><span class="nx">app</span>: <span class="kt">any</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">NProgress</span><span class="p">.</span><span class="nx">done</span><span class="p">()</span> <span class="c1">// 进度条结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="nx">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">})</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kr">export</span> <span class="k">default</span> <span class="nx">start</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="结语">结语</h2>
+<p><code>qiankun</code>框架确实挺不错的，配置也并不是复杂，但是唯一想吐槽的一点是对于ts的支持感觉不太好/狗头，或许是我写得不够好吧，后面会持续优化使用。</p>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li><a class="link" href="https://qiankun.umijs.org/zh/guide"  target="_blank" rel="noopener"
+    >qiankun官方文档</a></li>
+<li><a class="link" href="https://juejin.cn/post/6981656757458173988"  target="_blank" rel="noopener"
+    >vue3+ts+qiankun的微前端快速上手</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/vue/">Vue</a>
+        
+            <a href="/tags/typescript/">TypeScript</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/vue3-ts-electron%E4%B8%8D%E6%94%AF%E6%8C%81require-is-not-defined%E6%8A%A5%E9%94%99%E8%A7%A3%E5%86%B3/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">vue3&#43;ts&#43;electron不支持require is not defined报错解决</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

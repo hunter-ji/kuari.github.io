@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='简介 前端还在传文件给后端吗？你们的服务器扛得住吗？什么&amp;hellip;&amp;hellip;老板砸钱加机器？！告辞！/狗头
+前后端文件传输涉及数据较大，往往会成为很多项目的性能瓶颈。常见的传输方式也有不少，相对来说，OSS直传能够减轻很大压力。
+本文我们来列举下常见的和oss直传的几种传输方式，并列举其优劣。
+常见方式 表单上传 表单上传文件是最常见的方式，前后端开发小伙伴都很轻松，前端哐哐传，后端哐哐收就成了。其过程如下图所示。
+优势：
+简单方便，开发量小 前后端原生支持，无需额外第三方库支持 Base64上传 Base64方式上传文件，多常见于小文件，如小图片等，前后端都可直接使用String类型发送和接收。不过在前端，需要将文件转成base64数据，不仅会增加些性能消耗，还会增加传输数据的体积。而对于后端，如果并不是想直接存储base64数据，也还需要将其转成文件再存储，也会增加后端的性能消耗。
+该上传方式可适用于Resetful Api，也可适用于文件的加密、回调接口携带文件等等。其过程如下图所示。
+优势：
+适用于Resetful Api，可用于加密、回调等场景，较为灵活 劣势：
+前后端文件与base64数据转换需要消耗性能 只适用于小文件 OSS直传 此处的OSS直传方案都是使用的阿里云的OSS产品，以下将介绍三个方案，可适用于不同的场景。
+Browser.js SDK上传 该方案可在前端直接通过browser.js上传文件到OSS，可分成三步：
+前端使用SDK直传OSS 前端上传完成后请求后端，通知上传完成 后端检测OSS上该文件是否存在（可选） 其流程如下图所示。
+Browser.js的方式需要前端安装阿里云的库ali-oss，然后在前端调用。直传还需要OSS账户的Key和Secret，因此为了安全考虑，需要建立RAM账户，然后前端向后端先请求一个STS临时访问凭证来完成直传，其流程如下图所示。
+Javascript客户端签名直传 Javascript客户端签名直传，需要先从后端获取临时签名，其流程与上一步的browser.js方案大致相同，不同点在于：
+无需第三方库支持，直接表单上传 原生支持后端上传回调（下一步骤讲述） 其流程如下图所示。
+不过该方案做下来，我感觉最大的问题是权限配置有点麻烦&amp;hellip;&amp;hellip;/泪眼
+服务端签名直传并设置上传回调 该方案其实是上面方案——Javascript客户端签名直传的升级版本，其加上了后端的上传回调功能。不错呦～
+前端需要改动的很少，只需要在请求参数中加上callback参数即可，该参数为后端加密，在签名请求的响应中一起返回回来，内加密了后端回调接口。在前端直传完成后，后端回调接口将会接收到相关文件参数，包括文件路径、大小、类型等。最后OSS会将回调接口response转发给前端，响应直传OSS的请求。
+其流程如下图所示。
+对比 传统方式相比直传OSS，相对来说有三个缺点：
+上传慢：用户数据需先上传到应用服务器，之后再上传到OSS。网络传输时间比直传到OSS多一倍。如果用户数据不通过应用服务器中转，而是直传到OSS，速度将大大提升。而且OSS采用BGP带宽，能保证各地各运营商之间的传输速度。 扩展性差：如果后续用户多了，应用服务器会成为瓶颈。 费用高：需要准备多台应用服务器。由于OSS上传流量是免费的，如果数据直传到OSS，不通过应用服务器，那么将能省下几台应用服务器。 当然，对于规模较小、成本较低的项目来说，常见的上传方式还是适合的，毕竟没有最好的，只有最适合的。
+参考文档 Web端上传介绍
+JavaScript客户端签名直传
+服务端签名直传并设置上传回调'>
+<title>前端文件花式直传OSS！后端：那我走？</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/%E5%89%8D%E7%AB%AF%E6%96%87%E4%BB%B6%E8%8A%B1%E5%BC%8F%E7%9B%B4%E4%BC%A0oss%E5%90%8E%E7%AB%AF%E9%82%A3%E6%88%91%E8%B5%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='前端文件花式直传OSS！后端：那我走？'>
+<meta property='og:description' content='简介 前端还在传文件给后端吗？你们的服务器扛得住吗？什么&amp;hellip;&amp;hellip;老板砸钱加机器？！告辞！/狗头
+前后端文件传输涉及数据较大，往往会成为很多项目的性能瓶颈。常见的传输方式也有不少，相对来说，OSS直传能够减轻很大压力。
+本文我们来列举下常见的和oss直传的几种传输方式，并列举其优劣。
+常见方式 表单上传 表单上传文件是最常见的方式，前后端开发小伙伴都很轻松，前端哐哐传，后端哐哐收就成了。其过程如下图所示。
+优势：
+简单方便，开发量小 前后端原生支持，无需额外第三方库支持 Base64上传 Base64方式上传文件，多常见于小文件，如小图片等，前后端都可直接使用String类型发送和接收。不过在前端，需要将文件转成base64数据，不仅会增加些性能消耗，还会增加传输数据的体积。而对于后端，如果并不是想直接存储base64数据，也还需要将其转成文件再存储，也会增加后端的性能消耗。
+该上传方式可适用于Resetful Api，也可适用于文件的加密、回调接口携带文件等等。其过程如下图所示。
+优势：
+适用于Resetful Api，可用于加密、回调等场景，较为灵活 劣势：
+前后端文件与base64数据转换需要消耗性能 只适用于小文件 OSS直传 此处的OSS直传方案都是使用的阿里云的OSS产品，以下将介绍三个方案，可适用于不同的场景。
+Browser.js SDK上传 该方案可在前端直接通过browser.js上传文件到OSS，可分成三步：
+前端使用SDK直传OSS 前端上传完成后请求后端，通知上传完成 后端检测OSS上该文件是否存在（可选） 其流程如下图所示。
+Browser.js的方式需要前端安装阿里云的库ali-oss，然后在前端调用。直传还需要OSS账户的Key和Secret，因此为了安全考虑，需要建立RAM账户，然后前端向后端先请求一个STS临时访问凭证来完成直传，其流程如下图所示。
+Javascript客户端签名直传 Javascript客户端签名直传，需要先从后端获取临时签名，其流程与上一步的browser.js方案大致相同，不同点在于：
+无需第三方库支持，直接表单上传 原生支持后端上传回调（下一步骤讲述） 其流程如下图所示。
+不过该方案做下来，我感觉最大的问题是权限配置有点麻烦&amp;hellip;&amp;hellip;/泪眼
+服务端签名直传并设置上传回调 该方案其实是上面方案——Javascript客户端签名直传的升级版本，其加上了后端的上传回调功能。不错呦～
+前端需要改动的很少，只需要在请求参数中加上callback参数即可，该参数为后端加密，在签名请求的响应中一起返回回来，内加密了后端回调接口。在前端直传完成后，后端回调接口将会接收到相关文件参数，包括文件路径、大小、类型等。最后OSS会将回调接口response转发给前端，响应直传OSS的请求。
+其流程如下图所示。
+对比 传统方式相比直传OSS，相对来说有三个缺点：
+上传慢：用户数据需先上传到应用服务器，之后再上传到OSS。网络传输时间比直传到OSS多一倍。如果用户数据不通过应用服务器中转，而是直传到OSS，速度将大大提升。而且OSS采用BGP带宽，能保证各地各运营商之间的传输速度。 扩展性差：如果后续用户多了，应用服务器会成为瓶颈。 费用高：需要准备多台应用服务器。由于OSS上传流量是免费的，如果数据直传到OSS，不通过应用服务器，那么将能省下几台应用服务器。 当然，对于规模较小、成本较低的项目来说，常见的上传方式还是适合的，毕竟没有最好的，只有最适合的。
+参考文档 Web端上传介绍
+JavaScript客户端签名直传
+服务端签名直传并设置上传回调'>
+<meta property='og:url' content='https://blog.hunterji.com/p/%E5%89%8D%E7%AB%AF%E6%96%87%E4%BB%B6%E8%8A%B1%E5%BC%8F%E7%9B%B4%E4%BC%A0oss%E5%90%8E%E7%AB%AF%E9%82%A3%E6%88%91%E8%B5%B0/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ObjectStorage' /><meta property='article:published_time' content='2021-09-28T09:53:18&#43;00:00'/><meta property='article:modified_time' content='2021-09-28T09:53:18&#43;00:00'/>
+<meta name="twitter:title" content="前端文件花式直传OSS！后端：那我走？">
+<meta name="twitter:description" content="简介 前端还在传文件给后端吗？你们的服务器扛得住吗？什么&amp;hellip;&amp;hellip;老板砸钱加机器？！告辞！/狗头
+前后端文件传输涉及数据较大，往往会成为很多项目的性能瓶颈。常见的传输方式也有不少，相对来说，OSS直传能够减轻很大压力。
+本文我们来列举下常见的和oss直传的几种传输方式，并列举其优劣。
+常见方式 表单上传 表单上传文件是最常见的方式，前后端开发小伙伴都很轻松，前端哐哐传，后端哐哐收就成了。其过程如下图所示。
+优势：
+简单方便，开发量小 前后端原生支持，无需额外第三方库支持 Base64上传 Base64方式上传文件，多常见于小文件，如小图片等，前后端都可直接使用String类型发送和接收。不过在前端，需要将文件转成base64数据，不仅会增加些性能消耗，还会增加传输数据的体积。而对于后端，如果并不是想直接存储base64数据，也还需要将其转成文件再存储，也会增加后端的性能消耗。
+该上传方式可适用于Resetful Api，也可适用于文件的加密、回调接口携带文件等等。其过程如下图所示。
+优势：
+适用于Resetful Api，可用于加密、回调等场景，较为灵活 劣势：
+前后端文件与base64数据转换需要消耗性能 只适用于小文件 OSS直传 此处的OSS直传方案都是使用的阿里云的OSS产品，以下将介绍三个方案，可适用于不同的场景。
+Browser.js SDK上传 该方案可在前端直接通过browser.js上传文件到OSS，可分成三步：
+前端使用SDK直传OSS 前端上传完成后请求后端，通知上传完成 后端检测OSS上该文件是否存在（可选） 其流程如下图所示。
+Browser.js的方式需要前端安装阿里云的库ali-oss，然后在前端调用。直传还需要OSS账户的Key和Secret，因此为了安全考虑，需要建立RAM账户，然后前端向后端先请求一个STS临时访问凭证来完成直传，其流程如下图所示。
+Javascript客户端签名直传 Javascript客户端签名直传，需要先从后端获取临时签名，其流程与上一步的browser.js方案大致相同，不同点在于：
+无需第三方库支持，直接表单上传 原生支持后端上传回调（下一步骤讲述） 其流程如下图所示。
+不过该方案做下来，我感觉最大的问题是权限配置有点麻烦&amp;hellip;&amp;hellip;/泪眼
+服务端签名直传并设置上传回调 该方案其实是上面方案——Javascript客户端签名直传的升级版本，其加上了后端的上传回调功能。不错呦～
+前端需要改动的很少，只需要在请求参数中加上callback参数即可，该参数为后端加密，在签名请求的响应中一起返回回来，内加密了后端回调接口。在前端直传完成后，后端回调接口将会接收到相关文件参数，包括文件路径、大小、类型等。最后OSS会将回调接口response转发给前端，响应直传OSS的请求。
+其流程如下图所示。
+对比 传统方式相比直传OSS，相对来说有三个缺点：
+上传慢：用户数据需先上传到应用服务器，之后再上传到OSS。网络传输时间比直传到OSS多一倍。如果用户数据不通过应用服务器中转，而是直传到OSS，速度将大大提升。而且OSS采用BGP带宽，能保证各地各运营商之间的传输速度。 扩展性差：如果后续用户多了，应用服务器会成为瓶颈。 费用高：需要准备多台应用服务器。由于OSS上传流量是免费的，如果数据直传到OSS，不通过应用服务器，那么将能省下几台应用服务器。 当然，对于规模较小、成本较低的项目来说，常见的上传方式还是适合的，毕竟没有最好的，只有最适合的。
+参考文档 Web端上传介绍
+JavaScript客户端签名直传
+服务端签名直传并设置上传回调">
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#简介">简介</a></li>
+    <li><a href="#常见方式">常见方式</a>
+      <ol>
+        <li><a href="#表单上传">表单上传</a></li>
+        <li><a href="#base64上传">Base64上传</a></li>
+      </ol>
+    </li>
+    <li><a href="#oss直传">OSS直传</a>
+      <ol>
+        <li><a href="#browserjs-sdk上传">Browser.js SDK上传</a></li>
+        <li><a href="#javascript客户端签名直传">Javascript客户端签名直传</a></li>
+        <li><a href="#服务端签名直传并设置上传回调">服务端签名直传并设置上传回调</a></li>
+      </ol>
+    </li>
+    <li><a href="#对比">对比</a></li>
+    <li><a href="#参考文档">参考文档</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E5%89%8D%E7%AB%AF%E6%96%87%E4%BB%B6%E8%8A%B1%E5%BC%8F%E7%9B%B4%E4%BC%A0oss%E5%90%8E%E7%AB%AF%E9%82%A3%E6%88%91%E8%B5%B0/">前端文件花式直传OSS！后端：那我走？</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Sep 28, 2021</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    1 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="简介">简介</h2>
+<p>前端还在传文件给后端吗？你们的服务器扛得住吗？什么&hellip;&hellip;老板砸钱加机器？！告辞！/狗头</p>
+<p>前后端文件传输涉及数据较大，往往会成为很多项目的性能瓶颈。常见的传输方式也有不少，相对来说，OSS直传能够减轻很大压力。</p>
+<p>本文我们来列举下常见的和oss直传的几种传输方式，并列举其优劣。</p>
+<h2 id="常见方式">常见方式</h2>
+<h3 id="表单上传">表单上传</h3>
+<p>表单上传文件是最常见的方式，前后端开发小伙伴都很轻松，前端哐哐传，后端哐哐收就成了。其过程如下图所示。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1guw3hw7k3uj60ix06q74b02.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="form上传"
+	
+	
+></p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>简单方便，开发量小</li>
+<li>前后端原生支持，无需额外第三方库支持</li>
+</ul>
+<h3 id="base64上传">Base64上传</h3>
+<p>Base64方式上传文件，多常见于小文件，如小图片等，前后端都可直接使用<code>String</code>类型发送和接收。不过在前端，需要将文件转成base64数据，不仅会增加些性能消耗，还会增加传输数据的体积。而对于后端，如果并不是想直接存储base64数据，也还需要将其转成文件再存储，也会增加后端的性能消耗。</p>
+<p>该上传方式可适用于<code>Resetful Api</code>，也可适用于文件的加密、回调接口携带文件等等。其过程如下图所示。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1guvkwpx4d9j60ix06q74d02.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="base64上传"
+	
+	
+></p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>适用于<code>Resetful Api</code>，可用于加密、回调等场景，较为灵活</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>前后端文件与base64数据转换需要消耗性能</li>
+<li>只适用于小文件</li>
+</ul>
+<h2 id="oss直传">OSS直传</h2>
+<p>此处的OSS直传方案都是使用的阿里云的OSS产品，以下将介绍三个方案，可适用于不同的场景。</p>
+<h3 id="browserjs-sdk上传">Browser.js SDK上传</h3>
+<p>该方案可在前端直接通过<code>browser.js</code>上传文件到OSS，可分成三步：</p>
+<ol>
+<li>前端使用SDK直传OSS</li>
+<li>前端上传完成后请求后端，通知上传完成</li>
+<li>后端检测OSS上该文件是否存在（可选）</li>
+</ol>
+<p>其流程如下图所示。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1guvlvyap7zj60lc0crjru02.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="browser直传"
+	
+	
+></p>
+<p><code>Browser.js</code>的方式需要前端安装阿里云的库<code>ali-oss</code>，然后在前端调用。直传还需要OSS账户的Key和Secret，因此为了安全考虑，需要建立RAM账户，然后前端向后端先请求一个<code>STS</code>临时访问凭证来完成直传，其流程如下图所示。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1guvlvuqm2bj60lc0cr0tb02.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="browser直传2"
+	
+	
+></p>
+<h3 id="javascript客户端签名直传">Javascript客户端签名直传</h3>
+<p>Javascript客户端签名直传，需要先从后端获取临时签名，其流程与上一步的<code>browser.js</code>方案大致相同，不同点在于：</p>
+<ul>
+<li>无需第三方库支持，直接表单上传</li>
+<li>原生支持后端上传回调（下一步骤讲述）</li>
+</ul>
+<p>其流程如下图所示。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1guvm1snim8j60lc0crgm202.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="javascript签名直传"
+	
+	
+></p>
+<p>不过该方案做下来，我感觉最大的问题是权限配置有点麻烦&hellip;&hellip;/泪眼</p>
+<h3 id="服务端签名直传并设置上传回调">服务端签名直传并设置上传回调</h3>
+<p>该方案其实是上面方案——Javascript客户端签名直传的升级版本，其加上了后端的上传回调功能。不错呦～</p>
+<p>前端需要改动的很少，只需要在请求参数中加上<code>callback</code>参数即可，该参数为后端加密，在签名请求的响应中一起返回回来，内加密了后端回调接口。在前端直传完成后，后端回调接口将会接收到相关文件参数，包括文件路径、大小、类型等。最后OSS会将回调接口response转发给前端，响应直传OSS的请求。</p>
+<p>其流程如下图所示。</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1guvmceaql3j60lc0craak02.jpg"
+	
+	
+	
+	loading="lazy"
+	
+		alt="后端签名直传且回调"
+	
+	
+></p>
+<h2 id="对比">对比</h2>
+<p>传统方式相比直传OSS，相对来说有三个缺点：</p>
+<ul>
+<li>上传慢：用户数据需先上传到应用服务器，之后再上传到OSS。网络传输时间比直传到OSS多一倍。如果用户数据不通过应用服务器中转，而是直传到OSS，速度将大大提升。而且OSS采用BGP带宽，能保证各地各运营商之间的传输速度。</li>
+<li>扩展性差：如果后续用户多了，应用服务器会成为瓶颈。</li>
+<li>费用高：需要准备多台应用服务器。由于OSS上传流量是免费的，如果数据直传到OSS，不通过应用服务器，那么将能省下几台应用服务器。</li>
+</ul>
+<p>当然，对于规模较小、成本较低的项目来说，常见的上传方式还是适合的，毕竟没有最好的，只有最适合的。</p>
+<h2 id="参考文档">参考文档</h2>
+<ul>
+<li>
+<p><a class="link" href="https://help.aliyun.com/document_detail/112718.html?spm=5176.22414175.sslink.2.3fc92aca2CzF4n"  target="_blank" rel="noopener"
+    >Web端上传介绍</a></p>
+</li>
+<li>
+<p><a class="link" href="https://help.aliyun.com/document_detail/31925.html"  target="_blank" rel="noopener"
+    >JavaScript客户端签名直传</a></p>
+</li>
+<li>
+<p><a class="link" href="https://help.aliyun.com/document_detail/267439.html?spm=a2c4g.11186623.0.0.13415d3fbA6bxA"  target="_blank" rel="noopener"
+    >服务端签名直传并设置上传回调</a></p>
+</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/objectstorage/">ObjectStorage</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='叠加所有优化buff，最终能够减少约77%的体积，很强！'>
+<title>使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积'>
+<meta property='og:description' content='叠加所有优化buff，最终能够减少约77%的体积，很强！'>
+<meta property='og:url' content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='WebAssembly' /><meta property='article:tag' content='Rust' /><meta property='article:published_time' content='2023-10-26T23:51:13&#43;00:00'/><meta property='article:modified_time' content='2023-10-26T23:51:13&#43;00:00'/><meta property='og:image' content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover.jpg' />
+<meta name="twitter:title" content="使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积">
+<meta name="twitter:description" content="叠加所有优化buff，最终能够减少约77%的体积，很强！"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover.jpg' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#查看体积">查看体积</a>
+      <ol>
+        <li><a href="#ls">ls</a></li>
+        <li><a href="#stat">stat</a></li>
+        <li><a href="#wc">wc</a></li>
+      </ol>
+    </li>
+    <li><a href="#代码层面">代码层面</a>
+      <ol>
+        <li><a href="#代码内">代码内</a></li>
+        <li><a href="#代码外">代码外</a></li>
+      </ol>
+    </li>
+    <li><a href="#网络层面">网络层面</a>
+      <ol>
+        <li><a href="#开启gzip">开启GZIP</a></li>
+        <li><a href="#服务端支持">服务端支持</a></li>
+      </ol>
+    </li>
+    <li><a href="#物理层面">物理层面</a>
+      <ol>
+        <li><a href="#物理压缩">物理压缩</a></li>
+        <li><a href="#物理解压">物理解压</a></li>
+      </ol>
+    </li>
+    <li><a href="#buff叠加">BUFF叠加</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_800x0_resize_q75_box.jpg"
+                        srcset="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_800x0_resize_q75_box.jpg 800w, /p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_1600x0_resize_q75_box.jpg 1600w"
+                        width="800" 
+                        height="526" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/">使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            叠加所有优化buff，最终能够减少约77%的体积，很强！
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 26, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    2 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>在上一篇文章<a class="link" href="https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/"  target="_blank" rel="noopener"
+    >《使用Rust和WebAssembly整花活儿(三)——Rust与JS交互》</a>中，讲述了Rust与JS的交互，包括Rust与JS的函数相互调用，比较炸裂的功能就是使用JS调用Rust的struct，JS本身连struct都没有，居然可以调用Rust的struct，这对于Rust开发者的开发体验而言，是真的很棒！</p>
+<p>基于前面的系列文章，已经足以使用Rust开发一个完整的功能了。</p>
+<p>但是，在前端引入wasm文件时，还是可能存在一些问题，比如wasm文件较大，导致网页访问时间较长，用户体验较差。本篇文章将会通过多种途径来减少Rust编译wasm文件的体积，以减少前端加载wasm文件的时间。</p>
+<p>曾经一段时间，我一直用<a class="link" href="https://blog.hunterji.com/p/webassembly--%E6%9C%AA%E6%9D%A5%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91%E7%9A%84%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/"  target="_blank" rel="noopener"
+    >Go开发WebAssembly</a>，其编译后的wasm文件体积还是较大的，为了减少wasm文件的体积真是煞费苦心，1xMB大小的wasm文件真的是太痛了&hellip;&hellip;但是体积优化往往都会指向一条“充满魅惑的不归路”——换成Rust开发😆！如果你已经在用Rust开发WebAssembly了，那么恭喜你，对Go而言，在wasm体积上，你已经赢在起跑线上了。</p>
+<h2 id="环境">环境</h2>
+<ul>
+<li>Rust 1.70.0</li>
+<li>wasm-bindgen 0.2.87</li>
+</ul>
+<h2 id="查看体积">查看体积</h2>
+<p>在真正去减少体积前，我们需要来先看一下，当前情况下体积是多少，方便后续对比前后体积。</p>
+<p>查看体积的方式有多种，这里推荐几个，（Linux和MacOS）使用其一即可。</p>
+<h3 id="ls">ls</h3>
+<p>可以使用<code>ls -l</code>或者<code>ll</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ ll pkg/hello_wasm_bg.wasm
+</span></span><span class="line"><span class="cl">-rw-r--r--  <span class="m">1</span> kuari  staff    23K Jul <span class="m">20</span> 21:52 pkg/hello_wasm_bg.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="stat">stat</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ stat pkg/hello_wasm_bg.wasm
+</span></span><span class="line"><span class="cl"><span class="m">16777222</span> <span class="m">142141572</span> -rw-r--r-- <span class="m">1</span> kuari staff <span class="m">0</span> <span class="m">23347</span> <span class="s2">&#34;Jul 20 21:52:53 2023&#34;</span> <span class="s2">&#34;Jul 20 21:52:01 2023&#34;</span> <span class="s2">&#34;Jul 20 21:52:01 2023&#34;</span> <span class="s2">&#34;Jul 20 21:52:01 2023&#34;</span> <span class="m">4096</span> <span class="m">48</span> <span class="m">0</span> pkg/hello_wasm_bg.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="wc">wc</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ wc -c pkg/hello_wasm_bg.wasm
+</span></span><span class="line"><span class="cl">   <span class="m">23347</span> pkg/hello_wasm_bg.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>以<code>wc</code>为例，当前该wasm文件体积为<strong>23347b</strong>。</p>
+<h2 id="代码层面">代码层面</h2>
+<blockquote>
+<p>Link-Time Optimization (LTO) 是指在程序链接时进行的一种过程间优化（interprocedural optimization）。它允许编译器在链接阶段对多个编译单元进行优化，从而提高程序的性能、可靠性和安全性。</p>
+</blockquote>
+<p>从代码层面优化，主要是利用LTO（Link-Time Optimization）。</p>
+<h3 id="代码内">代码内</h3>
+<p>在<code>Cargo.toml</code>中开启LTO：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">profile</span><span class="p">.</span><span class="nx">release</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">lto</span> <span class="p">=</span> <span class="kc">true</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>开启LTO虽然能够减少编译后的体积，但是也会增加编译时间。</p>
+<p>LTO开启后，默认是在减少一定程度的编译体积的情况下，要确保编译的时间。如果你的需求就是更小的体积，而不是较短的时间，那么，可以通过手动指定编译等级来让LTO作出改变。</p>
+<p>在代码内可以使用如下等级：</p>
+<ul>
+<li><code>s</code>：默认的 LTO 等级。它会进行最基本的 LTO 优化，包括内联函数、函数重写、数据重排等</li>
+<li><code>z</code>：最高级的 LTO 等级。它会进行更复杂的 LTO 优化，包括死代码消除、内存分配优化、安全性优化等</li>
+</ul>
+<p>那么可以在<code>Cargo.toml</code>中这么配置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">profile</span><span class="p">.</span><span class="nx">release</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">lto</span> <span class="p">=</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl"><span class="nx">opt-level</span> <span class="p">=</span> <span class="s1">&#39;z&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>原始的文件体积是23347b，现在编译后看一下体积：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ wc -c pkg/hello_wasm_bg.wasm
+</span></span><span class="line"><span class="cl">   <span class="m">19879</span> pkg/hello_wasm_bg.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>很明显是减少体积！但是，使用<code>z</code>等级并不代表一定每次体积都会比<code>s</code>小的，有时候<code>s</code>也会比<code>z</code>小，这需要视代码情况而定。</p>
+<h3 id="代码外">代码外</h3>
+<p>在代码外，可以使用<a class="link" href="https://github.com/WebAssembly/binaryen"  target="_blank" rel="noopener"
+    >wasm-opt</a>来进行优化，其可以对 WebAssembly 模块进行多方面的优化，当然本篇文章中重点在体积方面（挖个坑，后面再详聊/狗头）。并且wasm-opt可以对所有符合WebAssembly规范的wasm文件进行优化，所以，就算你不是Rust写的，那也可以用其进行优化。（想想我曾经Go写的wasm，也是有多一个法子可以优化一把了&hellip;&hellip;）</p>
+<p>首先，来看一下wasm-opt的基本优化参数：</p>
+<ul>
+<li><strong>-o</strong>：指定优化后的模块输出文件</li>
+<li><strong>-O</strong>：启用默认优化，等同于<code>-Os</code>参数</li>
+<li><strong>-O0</strong>：不进行任何优化</li>
+<li><strong>-O1</strong>：进行一些基本的优化，例如内联函数优化和死代码消除优化</li>
+<li><strong>-O2</strong>：进行更为彻底的优化，例如函数重写、数据重排、内存分配优化等</li>
+<li><strong>-O3</strong>：进行最为彻底的优化，包括一些可能影响程序功能的优化</li>
+<li><strong>-O4</strong>：与 <code>-O3</code> 相同，但会启用更为激进的优化</li>
+<li><strong>-Os</strong>：优化目标是减小代码大小，会进行一些可能影响性能的优化</li>
+<li><strong>-Oz</strong>：与 <code>-Os</code> 相同，但会启用更为激进的优化</li>
+</ul>
+<p>基于本篇文章主题，此处将使用<code>-Os</code>和<code>-Oz</code>两种参数，其于上述&quot;代码内&quot;的等级是对应的。</p>
+<p>此处以原始wasm文件，以<code>-Oz</code>参数来执行一下，看一下对比效果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ wc -c pkg/output.wasm
+</span></span><span class="line"><span class="cl">   <span class="m">23194</span> pkg/output.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>再以上述开启“代码内“LTO编译后的wasm文件，以wasm-opt执行一下，看一下对比效果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ wc -c pkg/output.wasm
+</span></span><span class="line"><span class="cl">   <span class="m">19871</span> pkg/output.wasm
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>总体而言，wasm文件的体积越来越小。只是当前我这里的案例，是沿用系列文章内容的代码，没有什么实际性复杂代码，再者本身体积已经很小了，所以不会特别有效果。</p>
+<h2 id="网络层面">网络层面</h2>
+<p>网络层面的话，就是众所周知的在网络传输时，客户端和服务端约定相同的压缩算法，然后服务端给出时进行压缩，客户端接收时进行解压。网络层面可以对传输报文进行压缩，但不丢失信息。</p>
+<p>比如大家都很熟悉的gzip压缩算法，不过，压缩算法有好几种：</p>
+<ul>
+<li>gzip</li>
+<li>compress</li>
+<li>deflate</li>
+<li>br</li>
+</ul>
+<p>其中gzip也是压缩率最高的了，此处就以gzip为例。</p>
+<p>在网络层面，将wasm文件以gzip压缩，减少其在传输时的体积。虽然减少了传输时的体积，但是浏览器在拿到压缩后的数据，需要消耗一定性能来解密。</p>
+<h3 id="开启gzip">开启GZIP</h3>
+<p>开启GZIP其实简单，只要前后端约定好都用gzip就行了。</p>
+<p>首先，前端请求wasm文件时，需要在request header中放入浏览器支持的压缩模式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Accept-Encoding: gzip, deflate
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接着，服务端收到这个请求后就可以给出服务端也支持的压缩模式，并告诉浏览器服务端将会用什么压缩模式。</p>
+<p>跟浏览器通信的方式就是将信息塞到respone header里面：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Content-Encoding: gzip
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样就开启GZIP了。</p>
+<p>然后，就是浏览器接收到response的body和header，知道后端使用gzip压缩的，那么浏览器就会自动用gzip来解压，拿到完整的数据了。</p>
+<h3 id="服务端支持">服务端支持</h3>
+<p>或许你会想问，浏览器能自动解密，那服务端怎么自动加密呢？要后端写代码让文件加密吗？</p>
+<p>那当然不是了，直接让http server来完成这个操作。此处以耳熟能详的Nginx为例。</p>
+<p>最简单的就是一行配置开启gzip了：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">gzip on;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>也可以指定gzip的一些参数，比如可以加密的类型、最小加密长度等等：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">gzip on;
+</span></span><span class="line"><span class="cl">gzip_types      text/plain application/xml;
+</span></span><span class="line"><span class="cl">gzip_proxied    no-cache no-store private expired auth;
+</span></span><span class="line"><span class="cl">gzip_min_length 1000;
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>更多的http server配置，可以去各自官方文档查阅。</p>
+<h2 id="物理层面">物理层面</h2>
+<p>你可能会惊奇，什么物理层面？！</p>
+<p>没错，真就是物理层面——直接对wasm文件进行gzip物理压缩！哈哈，这个方法也真是绝了，我之前在Go开发wasm时，寻找减少体积的时候发现的，如果你的wasm已经优化得穷途末路了，不妨大胆试试这个方案。😆</p>
+<p>还记得上面章节“网络层面“中，有个问题就是是否需要手动压缩，那么这里就是全程手动压缩和解压缩了，哈哈。</p>
+<h3 id="物理压缩">物理压缩</h3>
+<p>首先，是对wasm文件进行物理层面的gzip压缩，此处先使用原始的wasm（23347b）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">gzip -c pkg/hello_wasm_bg.wasm &gt; pkg/output.gz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后，看一下其体积：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ wc -c pkg/output.gz
+</span></span><span class="line"><span class="cl">   <span class="m">10403</span> pkg/output.gz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>效果卓群，从23347b减少到了10403b！</p>
+<p>然后来把上述“代码层面”的优化来一遍，看一下最后的体积：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ wc -c pkg/output.gz
+</span></span><span class="line"><span class="cl">    <span class="m">9237</span> pkg/output.gz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>效果更加卓群了，从19871b减少到了9237b了！</p>
+<p>所以，此处就是对wasm文件进行物理压缩并存储，然后浏览器请求时，直接请求到<code>.gz</code>文件。</p>
+<h3 id="物理解压">物理解压</h3>
+<p>浏览器拿到<code>.gz</code>文件后，需要物理解压。</p>
+<p>这里推荐使用<code>pako</code>这个前端库，对<code>.gz</code>文件进行解压：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="line"><span class="cl"><span class="kr">async</span> <span class="kd">function</span> <span class="nx">gunzipWasm</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">fetch</span><span class="p">(</span><span class="s2">&#34;target.gz&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">let</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="kr">await</span> <span class="nx">pako</span><span class="p">.</span><span class="nx">ungzip</span><span class="p">(</span><span class="kr">await</span> <span class="nx">res</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// A fetched response might be decompressed twice on Firefox.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// See https://bugzilla.mozilla.org/show_bug.cgi?id=610679
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="nx">buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="mh">0x1F</span> <span class="o">&amp;&amp;</span> <span class="nx">buffer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">===</span> <span class="mh">0x8B</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span><span class="nx">buffer</span> <span class="o">=</span> <span class="nx">pako</span><span class="p">.</span><span class="nx">ungzip</span><span class="p">(</span><span class="nx">buffer</span><span class="p">)}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nx">buffer</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>之后就可以直接使用了。</p>
+<h2 id="buff叠加">BUFF叠加</h2>
+<p>此处直接将上述所有方法都用起来，直接叠加buff，来看看当前（本系列文章积累的）这个案例能减少多少体积。在“物理层面”章节中，已经累加除了“网络层面”的buff了，所以可以直接使用其结果。而“网络层面”章节中，以gzip来压缩，将gzip的压缩率以40%来估算。</p>
+<p>那么最终该案例的wasm体积将在5542b，压缩率大约在77%！</p>
+<p>当然，还要算上一个初始的语言buff——Rust，使用Rust本身就已经导致wasm文件体积很小了。</p>
+<h2 id="总结">总结</h2>
+<p>本片文章中，从代码层面、网络层面、物理层面共三个层面介绍了对wasm文件的体积优化方案，其中共有四个方案。</p>
+<p>最后，当前（本系列文章积累的）该案例叠加了所有buff之后，能够减少77%的体积，真的感觉挺棒的了，哈哈。</p>
+<p>希望能够对各位有所帮助。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/webassembly/">WebAssembly</a>
+        
+            <a href="/tags/rust/">Rust</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(三)——Rust与JS交互"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(三)——Rust与JS交互</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(二)——DOM和类型转换"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(二)——DOM和类型转换</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%80%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%80%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(一)——快速开始"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(一)——快速开始</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

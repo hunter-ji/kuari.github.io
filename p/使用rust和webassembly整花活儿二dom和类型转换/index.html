@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~'>
+<title>使用Rust和WebAssembly整花活儿(二)——DOM和类型转换</title>
+
+<link rel='canonical' href='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='使用Rust和WebAssembly整花活儿(二)——DOM和类型转换'>
+<meta property='og:description' content='WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~'>
+<meta property='og:url' content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/'>
+<meta property='og:site_name' content='开发者小橙'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='WebAssembly' /><meta property='article:tag' content='Rust' /><meta property='article:published_time' content='2023-06-18T18:18:31&#43;00:00'/><meta property='article:modified_time' content='2023-06-18T18:18:31&#43;00:00'/><meta property='og:image' content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover.jpg' />
+<meta name="twitter:title" content="使用Rust和WebAssembly整花活儿(二)——DOM和类型转换">
+<meta name="twitter:description" content="WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://blog.hunterji.com/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover.jpg' />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hudb01ab6d48dedfdab966f93936237cd2_18789_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🥤</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">开发者小橙</a></h1>
+            <h2 class="site-description">全干工程师</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/242197490'
+                        target="_blank"
+                        title="bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-bilibili" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" />
+  <path d="M8 3l2 3" />
+  <path d="M16 3l-2 3" />
+  <path d="M9 13v-2" />
+  <path d="M15 11v2" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/hunter-ji'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://juejin.cn/user/2252248607099688'
+                        target="_blank"
+                        title="Juejin"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-juejin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M2 12l10 7.422l10 -7.422" />
+  <path d="M7 9l5 4l5 -4" />
+  <path d="M11 6l1 .8l1 -.8l-1 -.8z" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://www.zhihu.com/people/zuo-ye-de-tai-yang'
+                        target="_blank"
+                        title="Zhihu"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-zhihu" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M14 6h6v12h-2l-2 2l-1 -2h-1z" />
+  <path d="M4 12h6.5" />
+  <path d="M10.5 6h-5" />
+  <path d="M6 4c-.5 2.5 -1.5 3.5 -2.5 4.5" />
+  <path d="M8 6v7c0 4.5 -2 5.5 -4 7" />
+  <path d="M11 18l-3 -5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-bolt" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.267 0 .529 .026 .781 .076" />
+  <path d="M19 16l-2 3h4l-2 3" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#环境">环境</a></li>
+    <li><a href="#dom">DOM</a>
+      <ol>
+        <li><a href="#配置依赖">配置依赖</a></li>
+        <li><a href="#获取document">获取Document</a></li>
+        <li><a href="#操作element">操作Element</a></li>
+        <li><a href="#编译">编译</a></li>
+        <li><a href="#在html中调用">在html中调用</a></li>
+        <li><a href="#在浏览器验证">在浏览器验证</a></li>
+        <li><a href="#发现更多方法">发现更多方法</a></li>
+      </ol>
+    </li>
+    <li><a href="#rust与js的类型相互转换">Rust与JS的类型相互转换</a>
+      <ol>
+        <li><a href="#基础类型">基础类型</a></li>
+        <li><a href="#基础类型转换示例">基础类型转换示例</a></li>
+        <li><a href="#通用类型">通用类型</a></li>
+        <li><a href="#result">Result</a></li>
+        <li><a href="#直接引入js类型">直接引入JS类型</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_800x0_resize_q75_box.jpg"
+                        srcset="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_800x0_resize_q75_box.jpg 800w, /p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/cover_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_1600x0_resize_q75_box.jpg 1600w"
+                        width="800" 
+                        height="526" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(二)——DOM和类型转换" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%BA%8Cdom%E5%92%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/">使用Rust和WebAssembly整花活儿(二)——DOM和类型转换</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            WebAssembly可以使用多种语言开发, 如果你更注重性能和安全性, 那么使用Rust整花活儿是个更好的选择~
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jun 18, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    6 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言</h2>
+<p>在上一篇文章<a class="link" href="https://github.com/Kuari/Blog/issues/72"  target="_blank" rel="noopener"
+    >《使用Rust和WebAssembly整花活儿(一)——快速开始》</a>中，描述了如何创建项目和快速生成wasm并在前端中使用，迈出了整花活儿的第一步。</p>
+<p>在开发 Web 应用程序时，使用 Rust 编写的 Wasm 模块可以提供更高的性能和更好的安全性。但是，为了与现有的 JavaScript 代码集成，必须实现 Rust 与 JS 之间的交互。Rust 与 JS 交互的主要目的是将两种语言的优势结合起来，以实现更好的 Web 应用程序。</p>
+<p>本篇文章中，将基于上一篇文章中创建的项目来继续开发。</p>
+<p>源码：<a class="link" href="https://github.com/Kuari/hello-wasm"  target="_blank" rel="noopener"
+    >github.com/Kuari/hello-wasm</a></p>
+<h2 id="环境">环境</h2>
+<ul>
+<li>Rust 1.70.0</li>
+<li>wasm-bindgen 0.2.87</li>
+<li>web-sys 0.3.64</li>
+</ul>
+<h2 id="dom">DOM</h2>
+<h3 id="配置依赖">配置依赖</h3>
+<p>要操作DOM，需要引入新的依赖<code>web-sys</code>，因此，可以配置<code>Cargo.toml</code>中依赖如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wasm-bindgen</span> <span class="p">=</span> <span class="s2">&#34;0.2.87&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">web-sys</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.3.64&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[]</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>你或许会好奇，这个<code>features</code>是什么，讲真，我一开始很好奇，又没看到什么特别的说明，试错才发现，原来是要手动引入功能依赖&hellip;比如说，当你需要在Rust中使用JS的<code>console</code>，那么你需要在<code>features</code>中加入<code>console</code>。</p>
+<h3 id="获取document">获取Document</h3>
+<p>在Rust中使用<code>Document</code>，我们需要按照上一步的说明，添加<code>features</code>。那么这里有一个依赖关系，首先在Rust中获取<code>window</code>，然后再获取<code>document</code>。</p>
+<p>因此，添加<code>features</code>后如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wasm-bindgen</span> <span class="p">=</span> <span class="s2">&#34;0.2.87&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">web-sys</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.3.64&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;Window&#34;</span><span class="p">,</span> <span class="s2">&#34;Document&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后在<code>lib.rs</code>中创建一个函数，用来调用<code>document</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">update_message</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">web_sys</span>::<span class="n">window</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Failed to load window&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">document</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">window</span><span class="p">.</span><span class="n">document</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Failed to load document&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>那么，现在就是在Rust中解锁了<code>document</code>，就可以在前端为所欲为了！</p>
+<h3 id="操作element">操作Element</h3>
+<p>那么开始操作一波，首先得获取到<code>Element</code>&hellip;&hellip;</p>
+<p>是的，你没有想错，继续来添加<code>features</code>吧，此处要添加一个<code>Element</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wasm-bindgen</span> <span class="p">=</span> <span class="s2">&#34;0.2.87&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">web-sys</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.3.64&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;Window&#34;</span><span class="p">,</span> <span class="s2">&#34;Document&#34;</span><span class="p">,</span> <span class="s2">&#34;Element&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>ok，那么继续。此处设定函数传入两个参数<code>selector</code>和<code>message</code>，然后通过<code>selector</code>获取element，更新值为<code>message</code>参数的值。完整函数如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">update_message</span><span class="p">(</span><span class="n">selector</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">web_sys</span>::<span class="n">window</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Failed to load window&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">document</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">window</span><span class="p">.</span><span class="n">document</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Failed to load document&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">document</span><span class="p">.</span><span class="n">query_selector</span><span class="p">(</span><span class="n">selector</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Failed to load element&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">element</span><span class="p">.</span><span class="n">set_inner_html</span><span class="p">(</span><span class="n">message</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Failed to set inner html&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="编译">编译</h3>
+<p>将写完的Rust项目编译成wasm：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">wasm-pack build --target web
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="在html中调用">在html中调用</h3>
+<p>基于上一篇文章的项目中的html，此处添加一个<code>div</code>，id为<code>message</code>，添加调用wasm的<code>update_message</code>函数，代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;message&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">update_message</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span> <span class="c1">// 引入update_message函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">update_message</span><span class="p">(</span><span class="s1">&#39;#message&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;h1&gt;Hello, Rust!&lt;/h1&gt;&#39;</span><span class="p">);</span> <span class="c1">// 调用update_message函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="在浏览器验证">在浏览器验证</h3>
+<p>启动一个http server，然后在浏览器查看，可以看到在页面上出现一个<code>h1</code>标签的<code>Hello, Rust!</code>。</p>
+<h3 id="发现更多方法">发现更多方法</h3>
+<p>按照文章来写的过程中，你应该会发现一个问题——怎么这些方法没有补全？！</p>
+<p>是的，没错的，（至少我发现）当前<code>web-sys</code>并没有补全，所以只能结合开发者优秀的前端技能和丰富的<a class="link" href="https://rustwasm.github.io/wasm-bindgen/api/web_sys/"  target="_blank" rel="noopener"
+    >官方文档</a>来开发了。</p>
+<h2 id="rust与js的类型相互转换">Rust与JS的类型相互转换</h2>
+<p>对于wasm而言，性能固然是提升的，但是类型转换一直是个问题。当大量数据需要在wasm/js中进行类型转换时，这对性能来说，真的是个灾难。之前在使用go开发wasm时，就遇到过这样的问题，需要用官方的方法来进行手动类型转换，然而wasm处理的是一个很大的数据量&hellip;&hellip;</p>
+<p>不过好在Rust的类型支持真的挺丰富的！</p>
+<h3 id="基础类型">基础类型</h3>
+<p>基础类型挺简单的，而且Rust的范性也很好地支持了很多类型。如下是基础类型映射表：</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>Rust类型</th>
+<th>JavaScript类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>i8</td>
+<td>number</td>
+</tr>
+<tr>
+<td>i16</td>
+<td>number</td>
+</tr>
+<tr>
+<td>i32</td>
+<td>number</td>
+</tr>
+<tr>
+<td>i64</td>
+<td>BigInt</td>
+</tr>
+<tr>
+<td>u8</td>
+<td>number</td>
+</tr>
+<tr>
+<td>u16</td>
+<td>number</td>
+</tr>
+<tr>
+<td>u32</td>
+<td>number</td>
+</tr>
+<tr>
+<td>u64</td>
+<td>BigInt</td>
+</tr>
+<tr>
+<td>f32</td>
+<td>number</td>
+</tr>
+<tr>
+<td>f64</td>
+<td>number</td>
+</tr>
+<tr>
+<td>bool</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>char</td>
+<td>string</td>
+</tr>
+<tr>
+<td>&amp;str</td>
+<td>string</td>
+</tr>
+<tr>
+<td>String</td>
+<td>string</td>
+</tr>
+<tr>
+<td>&amp;[T] 例如：&amp;[u8]</td>
+<td>[T] 例如：Uint8Array</td>
+</tr>
+<tr>
+<td>Vec<T></td>
+<td>Array</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="基础类型转换示例">基础类型转换示例</h3>
+<p>在<code>lib.rs</code>文件中，创建一个函数，挑选几个类型作为参数传入，然后将其读取并打印：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">print_values</span><span class="p">(</span><span class="n">js_number</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">js_boolean</span>: <span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="n">js_uint8_array</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span><span class="w"> </span><span class="n">js_number_array</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;js number: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">js_number</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;js boolean: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">js_boolean</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">js_uint8_array</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;js Uint8Array item: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">item</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">js_number_array</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">println!</span><span class="p">(</span><span class="s">&#34;js number array item: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">item</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以看到该函数传入了JS的<code>number</code>、<code>boolean</code>、<code>Uint8Array</code>和<code>Array</code>四个类型的参数。</p>
+<p>然后编译：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">wasm-pack build --target web
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接着，在前端中引入函数并调用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">print_values</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsNumber</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsBoolean</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsUint8Array</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Uint8Array</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">jsUint8Array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">jsUint8Array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">jsUint8Array</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsNumberArray</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">print_values</span><span class="p">(</span><span class="nx">jsNumber</span><span class="p">,</span> <span class="nx">jsBoolean</span><span class="p">,</span> <span class="nx">jsUint8Array</span><span class="p">,</span> <span class="nx">jsNumberArray</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后，启动http server并打开浏览器，在控制台可以看到&hellip;看不到？！</p>
+<p>是的，没错，Rust的<code>println!</code>只会将打印的内容发送到Rust的标准输出流，而不是前端的控制台。如果想在控制台中打印，那么需要调用JS的<code>console</code>了。</p>
+<p>使用新的功能，第一步就是添加<code>features</code>，<code>Cargo.toml</code>中添加<code>console</code>如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wasm-bindgen</span> <span class="p">=</span> <span class="s2">&#34;0.2.87&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">web-sys</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.3.64&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;Window&#34;</span><span class="p">,</span> <span class="s2">&#34;Document&#34;</span><span class="p">,</span> <span class="s2">&#34;Element&#34;</span><span class="p">,</span> <span class="s2">&#34;console&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在Rust中调用<code>console.log()</code>如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="n">web_sys</span>::<span class="n">console</span>::<span class="n">log_1</span><span class="p">(</span><span class="o">&amp;</span><span class="s">&#34;Hello, Rust!&#34;</span><span class="p">.</span><span class="n">into</span><span class="p">());</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>此处将其封装成一个函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">fn</span> <span class="nf">console_log</span><span class="p">(</span><span class="n">message</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">web_sys</span>::<span class="n">console</span>::<span class="n">log_1</span><span class="p">(</span><span class="o">&amp;</span><span class="n">message</span><span class="p">.</span><span class="n">into</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后，将示例函数的<code>println</code>改成<code>console_log()</code>和<code>format!</code>，函数代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">print_values</span><span class="p">(</span><span class="n">js_number</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">js_boolean</span>: <span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="n">js_uint8_array</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span><span class="w"> </span><span class="n">js_number_array</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;js number: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">js_number</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;js boolean: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">js_boolean</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">js_uint8_array</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;js Uint8Array item: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">item</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">js_number_array</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;js number array item: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">item</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后，编译之后，打开浏览器，就可以在控制台看到输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">js number: 10
+</span></span><span class="line"><span class="cl">js boolean: true
+</span></span><span class="line"><span class="cl">js Uint8Array item: 1
+</span></span><span class="line"><span class="cl">js Uint8Array item: 2
+</span></span><span class="line"><span class="cl">js Uint8Array item: 3
+</span></span><span class="line"><span class="cl">js number array item: 30
+</span></span><span class="line"><span class="cl">js number array item: 40
+</span></span><span class="line"><span class="cl">js number array item: 50
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="通用类型">通用类型</h3>
+<p>Rust中提供了一个通用的类型——JsValue，可以作为任何JS类型。</p>
+<p>这里给一个简单的案例，设置一个函数，使用<code>JsValue</code>作为参数传入，并打印。</p>
+<p>创建函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">print_js_value</span><span class="p">(</span><span class="n">val</span>: <span class="nc">JsValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{:?}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">val</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后编译成wasm文件。</p>
+<p>在html中调用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">print_js_value</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsNumber</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsBoolean</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsUint8Array</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Uint8Array</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">jsUint8Array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">jsUint8Array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">jsUint8Array</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kr">const</span> <span class="nx">jsNumberArray</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">print_js_value</span><span class="p">(</span><span class="nx">jsNumber</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">print_js_value</span><span class="p">(</span><span class="nx">jsBoolean</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">print_js_value</span><span class="p">(</span><span class="nx">jsUint8Array</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">print_js_value</span><span class="p">(</span><span class="nx">jsNumberArray</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在html中，传入了不同类型的参数，但是在浏览器的控制台中可以看到，将所有不同类型的参数都打印出来了：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">JsValue(10)
+</span></span><span class="line"><span class="cl">JsValue(true)
+</span></span><span class="line"><span class="cl">JsValue(Uint8Array)
+</span></span><span class="line"><span class="cl">JsValue([30, 40, 50])
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="result">Result</h3>
+<p><code>Result</code>在Rust中是一个很重要的存在，经常写Rust的话，也不想在写WebAssembly时改变开发习惯。</p>
+<p>其实对于JS而言，<code>Result</code>可以直接在<code>catch</code>中捕获到，只是说，这里我们需要定义好参数类型。</p>
+<p>####1 使用Result返回报错</p>
+<p>首先来一个只返回报错的场景：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">only_return_error_when_result</span><span class="p">(</span><span class="n">count</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span><span class="w"> </span><span class="n">JsError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">JsError</span>::<span class="n">new</span><span class="p">(</span><span class="s">&#34;count &lt; 10&#34;</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里返回类型是<code>Result</code>，但是仅仅返回了一个错误。值得注意的是，这里的报错使用的类型是<code>JsError</code>，当然，这里也可以使用<code>JsValue</code>。</p>
+<p>然后在html调用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">only_return_error_when_result</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">only_return_error_when_result</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;1 is ok&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;An error is reported when the input parameter is 1: &#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">only_return_error_when_result</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;100 is ok&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;An error is reported when the input parameter is 100: &#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里调用了两次，第一次应当是错误的，第二次应该是正确的，并且都使用了<code>catch</code>来捕获错误。</p>
+<p>那么，在浏览器的控制台可以看到输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">An error is reported when the input parameter is 1:  Error: count &lt; 10
+</span></span><span class="line"><span class="cl">100 is ok
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>####2 使用Result返回正常值和错误</p>
+<p>那么，如果想既返回正常值，也想返回错误呢？Rust返回一个<code>Result</code>是没有问题，那么JS怎么解析呢？</p>
+<p>直接上Rust代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">return_all_when_result</span><span class="p">(</span><span class="n">count</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">JsError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">JsError</span>::<span class="n">new</span><span class="p">(</span><span class="s">&#34;count &lt; 10&#34;</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>该函数，获取到参数后，如果满足条件，加10后返回，否则报错。</p>
+<p>那么看看html中如何调用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">return_all_when_result</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kr">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">return_all_when_result</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`get </span><span class="si">${</span><span class="nx">res</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;An error is reported when the input parameter is 1: &#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kr">const</span> <span class="nx">res</span> <span class="o">=</span> <span class="nx">return_all_when_result</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`get </span><span class="si">${</span><span class="nx">res</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;An error is reported when the input parameter is 100: &#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>是的，没错，正常获取就行了&hellip;&hellip;/捂脸哭</p>
+<p>这里的调用，依然是，第一个是错误的，第二个是正确返回值的，并且都使用了<code>catch</code>来捕获错误。</p>
+<p>最后，就是在浏览器的控制台中看到：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">An error is reported when the input parameter is 1:  Error: count &lt; 10
+</span></span><span class="line"><span class="cl">get 110                                                             
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="直接引入js类型">直接引入JS类型</h3>
+<p>如果你想更直接一点，那么可以直接引入JS类型！这里主要是利用<code>js-sys</code>这个依赖，可以在<a class="link" href="https://docs.rs/js-sys/latest/js_sys/"  target="_blank" rel="noopener"
+    >官方文档</a>上看到很多JS的类型和函数，直接引入即可使用。当然，一定场景下，直接引入的类型，是需要手动转换类型的。</p>
+<p>####1 配置依赖</p>
+<p>在<code>Cargo.toml</code>中添加<code>js-sys</code>依赖：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wasm-bindgen</span> <span class="p">=</span> <span class="s2">&#34;0.2.87&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">web-sys</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.3.64&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;Window&#34;</span><span class="p">,</span> <span class="s2">&#34;Document&#34;</span><span class="p">,</span> <span class="s2">&#34;Element&#34;</span><span class="p">,</span> <span class="s2">&#34;console&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">js-sys</span> <span class="p">=</span> <span class="s2">&#34;0.3.61&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>####2 Uint8Array</p>
+<p>首先以<code>Uint8Array</code>举例，在<code>lib.rs</code>头部引入类型：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">use</span><span class="w"> </span><span class="n">js_sys</span>::<span class="n">Uint8Array</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后创建一个函数，参数和返回都是<code>Uint8Array</code>类型：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">print_uint8_array</span><span class="p">(</span><span class="n">js_arr</span>: <span class="nc">Uint8Array</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Uint8Array</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// new Uint8Array
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Uint8Array</span>::<span class="n">new_with_length</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Uint8Array -&gt; vec
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">item</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">js_arr</span><span class="p">.</span><span class="n">to_vec</span><span class="p">().</span><span class="n">iter</span><span class="p">().</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{}</span><span class="s"> - the item in js_arr: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">item</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Avoid type conversion
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Use the method of the type itself
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">index</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">js_arr</span><span class="p">.</span><span class="n">length</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">console_log</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;</span><span class="si">{}</span><span class="s"> - the item in js_arr: </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">js_arr</span><span class="p">.</span><span class="n">get_index</span><span class="p">(</span><span class="n">index</span><span class="p">)));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// vec -&gt; Uint8Array
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">vec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">arr2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Uint8Array</span>::<span class="n">from</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">as_slice</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">arr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">arr2</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Use the method of the type itself
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">arr</span><span class="p">.</span><span class="n">set_index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">arr</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>忽略该函数中无意义的逻辑和<code>arr</code>变量的警告，只是为了演示用法。</p>
+</blockquote>
+<p>可以在代码中看到，直接引入的<code>Uint8Array</code>有自己的方法，一定场景下，需要转换类型，但是最好避免进行类型转换，而直接使用其自带的方法。</p>
+<p>这里可以简要总结下，就是最好一定场景内全部使用直接引入的JS类型，或者直接全部使用Rust类型来代替JS类型，两者都存在场景下，手动转换类型是件很糟糕的事。</p>
+<p>####3 Date</p>
+<p><code>Date</code>类型，在上面的篇章中都没有提及，这里可以直接引入JS的<code>Date</code>类型来使用。</p>
+<p>首先是引入类型：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">use</span><span class="w"> </span><span class="n">js_sys</span>::<span class="n">Date</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后，创建一个函数，返回时间戳：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="cp">#[wasm_bindgen]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">return_time</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="kt">f64</span> <span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Date</span>::<span class="n">new_0</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">date</span><span class="p">.</span><span class="n">get_time</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>接着，在html中调用：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="kr">import</span> <span class="nx">init</span><span class="p">,</span> <span class="p">{</span> <span class="nx">return_time</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./pkg/hello_wasm.js&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kr">const</span> <span class="nx">run</span> <span class="o">=</span> <span class="kr">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kr">await</span> <span class="nx">init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;current time: &#39;</span><span class="p">,</span> <span class="nx">return_time</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">run</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后，在浏览器的控制台中，可以看到：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">current time:  1686979932833
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="总结">总结</h2>
+<p>本文中，主要讲述了如何使用Rust来实现DOM操作，读者可以根据方法自己去找到合适的方法，来实现自己的场景。其次，还讲述了Rust与JS的类型转换，从基础的各自类型的映射，到Rust独有的<code>Result</code>，到直接引入JS类型。当然这里需要注意的是，直接引入JS类型和Rust的基础类型映射JS类型这两种方法尽量不要混用，混用会导致需要手动类型转换，造成性能损耗。</p>
+<p>至此，又向Rust和WebAssembly整花活儿迈进了一步~😼</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/webassembly/">WebAssembly</a>
+        
+            <a href="/tags/rust/">Rust</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E5%9B%9B%E6%9B%B4%E5%B0%8F%E6%9B%B4%E5%B0%8F%E7%9A%84wasm%E6%96%87%E4%BB%B6%E4%BD%93%E7%A7%AF/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(四)——更小更小的wasm文件体积</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%89rust%E4%B8%8Ejs%E4%BA%A4%E4%BA%92/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(三)——Rust与JS交互"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(三)——Rust与JS交互</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%80%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E4%BD%BF%E7%94%A8rust%E5%92%8Cwebassembly%E6%95%B4%E8%8A%B1%E6%B4%BB%E5%84%BF%E4%B8%80%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/cover.2e8b11dfa976d41e74c2f13eba5ef63c_hu822cb824dae9cb9cc6f33de0e5ba4a75_1034399_250x150_fill_q75_box_smart1.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 使用Rust和WebAssembly整花活儿(一)——快速开始"
+                        
+                        data-hash="md5-LosR36l21B50wvE&#43;ul72PA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用Rust和WebAssembly整花活儿(一)——快速开始</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="hunter-ji/blog-comment"
+        issue-term="pathname"
+        
+        label="utterances"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 开发者小橙
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.20.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
